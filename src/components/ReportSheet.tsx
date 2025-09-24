@@ -16,10 +16,6 @@ export default function ReportSheet({
   isOpen,
   onClose,
   risk,
-  network,
-  address,
-  time,
-  evidences,
   onMouseDown,
   DownloadIcon,
 }: Props) {
@@ -78,20 +74,20 @@ export default function ReportSheet({
           <S.ItemWrapper>
             <S.Key>홉 수</S.Key>
             <S.Val>
-              <span style={{ color: "rgb(214 40 62)" }}>2 ≤ 2</span>
+              <span style={{ color: "#ffb535" }}>2 ≤ 2</span>
             </S.Val>
           </S.ItemWrapper>
           <S.ItemWrapper>
             <S.Key>시간 간격</S.Key>
             <S.Val>
-              <span style={{ color: "rgb(63 127 22)" }}>35m ≤ 45m</span>
+              <span style={{ color: "#21B400" }}>35m ≤ 45m</span>
             </S.Val>
           </S.ItemWrapper>
 
           <S.ItemWrapper>
             <S.Key>금액 차이율</S.Key>
             <S.Val>
-              <span style={{ color: "rgb(63 127 22)" }}>0.18 ≤ 1.00</span>
+              <span style={{ color: "#21B400" }}>0.18 ≤ 1.00</span>
             </S.Val>
           </S.ItemWrapper>
 
