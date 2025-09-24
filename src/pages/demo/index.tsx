@@ -1,4 +1,4 @@
-import Header from "@/components/layout/Header";
+import Header from "@/components/layout/DemoHeader";
 import * as S from "./styles";
 import SendIcon from "@/assets/icon_send.svg";
 import { useState } from "react";

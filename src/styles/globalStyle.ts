@@ -4,18 +4,30 @@ const GlobalStyle = createGlobalStyle`
   @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css");
 
   * {
-    font-family: 'Pretendard','Noto Sans KR', sans-serif;
     margin: 0;
     padding: 0;
+
+    font-family: 'Pretendard','Noto Sans KR', sans-serif;
+    font-style: normal;
+    line-height: normal;
+  }
+
+  #root {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    justify-content: center; 
+    align-items: center;   
   }
 
   body {
-     margin: 0;
-  background-color: #f0f0f0; 
-  display: flex;
-  justify-content: center; 
-  align-items: center;     
-  height: 100vh;      
+    margin: 0;
+    background-color: #f0f0f0; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;     
+    height: 100dvh;  
+    width: 100dvw;
     }
 
   input {

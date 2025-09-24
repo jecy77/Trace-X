@@ -1,7 +1,11 @@
+import * as S from "../styles/detail.style";
+
 export default function TransactionDetail() {
   return (
     <>
-      <div>트랜잭션 상세</div>
+      <S.Root>
+        <S.HeaderSection>헤더</S.HeaderSection>
+      </S.Root>
     </>
   );
 }

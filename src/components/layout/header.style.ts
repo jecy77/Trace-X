@@ -1,30 +1,18 @@
 import styled from "styled-components";
 
 export const Header = styled.div`
-  padding: 15px 0;
-  padding-top: 30px;
-`;
+  padding: 25px;
+  position: relative;
+  top: 0;
 
-export const IconContainer = styled.div`
+  border-bottom: 3px solid #10122c;
+  background: linear-gradient(180deg, #161831 78.48%, #161831 100%);
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-`;
-export const Icon = styled.div`
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
 `;
 
-export const Title = styled.h1`
-  flex: 1;
-  text-align: left;
-  margin-top: 20px;
-  margin-left: 5px;
-
-  color: #0e0f15;
-  font-size: 18px;
+export const Title = styled.div`
+  color: white;
+  font-size: 25px;
   font-weight: 700;
-  line-height: 150%;
-  letter-spacing: 0.84px;
+  letter-spacing: 1.25px;
 `;
