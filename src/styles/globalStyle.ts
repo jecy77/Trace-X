@@ -10,6 +10,8 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Pretendard','Noto Sans KR', sans-serif;
     font-style: normal;
     line-height: normal;
+
+    box-sizing: border-box; //padding과 border가 width 안에 포함
   }
 
   #root {
@@ -34,6 +36,7 @@ const GlobalStyle = createGlobalStyle`
     border: none;
     padding: 0;
     margin: 0;
+    background-color: transparent;
   }
 
   input:focus {
