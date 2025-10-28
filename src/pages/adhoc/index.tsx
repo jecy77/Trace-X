@@ -6,7 +6,7 @@ type LayoutContext = {
   intro: string;
 };
 
-export default function HomePage() {
+export default function AdhocPage() {
   const { title, intro } = useOutletContext<LayoutContext>();
 
   return (

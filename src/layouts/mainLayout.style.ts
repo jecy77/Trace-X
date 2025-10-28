@@ -11,4 +11,5 @@ export const Root = styled.div`
 export const Content = styled.div`
   display: flex;
   flex: 1;
+  background: var(--neutral800, #080f25);
 `;

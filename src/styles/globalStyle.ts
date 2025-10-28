@@ -30,6 +30,7 @@ const GlobalStyle = createGlobalStyle`
     align-items: center;     
     height: 100dvh;  
     width: 100dvw;
+    font-family: 'Mona Sans', 'Noto Sans KR', 'Josefin Sans', sans-serif;
     }
 
   input {
