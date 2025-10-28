@@ -29,7 +29,7 @@ const GlobalStyle = createGlobalStyle`
     justify-content: center; 
     align-items: center;     
     height: 100dvh;  
-    width: 100dvw;
+    width: 100%;
     font-family: 'Mona Sans', 'Noto Sans KR', 'Josefin Sans', sans-serif;
     }
 
@@ -43,6 +43,31 @@ const GlobalStyle = createGlobalStyle`
   input:focus {
     outline: none;
   }
+
+  /* ====== Scrollbar Style (for all browsers) ====== */
+
+::-webkit-scrollbar {
+  width: 8px;               /* 스크롤바 두께 */
+  height: 8px;              /* 가로 스크롤용 */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #0B1739 0%, #0B1739  100%);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4f5fa5 0%, #243872 100%);
+}
+
+
+
 `;
 
 export default GlobalStyle;
