@@ -119,6 +119,128 @@ export default function HomePage() {
       <S.HeaderSection>
         <S.Title>이상 패턴 및 거래 모니터링</S.Title>
       </S.HeaderSection>
+
+      <S.AnomalySection>
+        {/* 이상 패턴 차트 */}
+        <S.AnomalyLeft>
+          <S.AnomalyCard>
+            <S.AnomalyHeader>
+              <S.LeftTitle>탐지된 이상 패턴 수</S.LeftTitle>
+            </S.AnomalyHeader>
+            <S.GaugePlaceholder>
+              <S.GaugeContainer>
+                <S.GaugeArc $fanin={15624} $peel={5546} $scatter={2478} />
+                <S.GaugeValue>23,648</S.GaugeValue>
+                <S.GaugeLabel>탐지된 이상 패턴 수</S.GaugeLabel>
+              </S.GaugeContainer>
+            </S.GaugePlaceholder>
+
+            <S.PatternList>
+              <S.PatternItem>
+                <S.LegendDot color="#D42649" />
+                <S.PatternText>Fan-in</S.PatternText>
+                <S.PatternValue>15,624</S.PatternValue>
+              </S.PatternItem>
+              <S.PatternItem>
+                <S.LegendDot color="#5CC8F8" />
+                <S.PatternText>Peel Chain</S.PatternText>
+                <S.PatternValue>5,546</S.PatternValue>
+              </S.PatternItem>
+              <S.PatternItem>
+                <S.LegendDot color="#847AFF" />
+                <S.PatternText>Scatter Gather</S.PatternText>
+                <S.PatternValue>2,478</S.PatternValue>
+              </S.PatternItem>
+            </S.PatternList>
+          </S.AnomalyCard>
+        </S.AnomalyLeft>
+
+        {/* 최근 고위험 거래 테이블 */}
+        <S.AnomalyRight>
+          <S.AnomalyCard>
+            <S.AnomalyHeader>
+              <S.LeftTitle>최근 고액 거래</S.LeftTitle>
+              <S.FilterButton>거래량 순</S.FilterButton>
+            </S.AnomalyHeader>
+
+            <S.Table>
+              <thead>
+                <tr>
+                  <th>TxHash</th>
+                  <th>날짜</th>
+                  <th>리스크</th>
+                  <th>거래량</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  {
+                    id: "#1532",
+                    date: "Dec 30, 10:06 AM",
+                    risk: "위험",
+                    amount: "$329.40",
+                  },
+                  {
+                    id: "#1531",
+                    date: "Dec 29, 2:59 AM",
+                    risk: "경고",
+                    amount: "$117.24",
+                  },
+                  {
+                    id: "#1530",
+                    date: "Dec 29, 1:54 AM",
+                    risk: "안전",
+                    amount: "$82.16",
+                  },
+                  {
+                    id: "#1531",
+                    date: "Dec 29, 2:59 AM",
+                    risk: "경고",
+                    amount: "$117.24",
+                  },
+                  {
+                    id: "#1532",
+                    date: "Dec 30, 10:06 AM",
+                    risk: "위험",
+                    amount: "$329.40",
+                  },
+                  {
+                    id: "#1531",
+                    date: "Dec 29, 2:59 AM",
+                    risk: "경고",
+                    amount: "$117.24",
+                  },
+                  {
+                    id: "#1531",
+                    date: "Dec 29, 2:59 AM",
+                    risk: "경고",
+                    amount: "$117.24",
+                  },
+                ].map((tx) => (
+                  <S.TableRow key={tx.id} $risk={tx.risk}>
+                    <td>{tx.id}</td>
+                    <td>{tx.date}</td>
+                    <td>
+                      <S.RiskTag
+                        $level={
+                          tx.risk === "위험"
+                            ? "high"
+                            : tx.risk === "경고"
+                            ? "mid"
+                            : "low"
+                        }
+                      >
+                        {tx.risk}
+                      </S.RiskTag>
+                    </td>
+                    <td>{tx.amount}</td>
+                  </S.TableRow>
+                ))}
+              </tbody>
+            </S.Table>
+          </S.AnomalyCard>
+        </S.AnomalyRight>
+      </S.AnomalySection>
     </S.Root>
   );
 }
