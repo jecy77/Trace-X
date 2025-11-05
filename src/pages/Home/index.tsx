@@ -13,6 +13,10 @@ import icon_num from "@/assets/icon_total_num.svg";
 import icon_danger from "@/assets/icon_danger.svg";
 import icon_warning from "@/assets/icon_warning.svg";
 import StatCard from "@/components/home/StatCard";
+import HighRiskChart from "@/components/home/HighRiskChart";
+import HighRiskByEachChain from "@/components/home/HighRiskByEachChain";
+import MeanRiskScore from "@/components/home/MeanRiskScore";
+import DetectedPatternGauge from "@/components/home/DetectedPatternGauge";
 
 export default function HomePage() {
   const { title, intro } = useOutletContext<LayoutContext>();
@@ -56,23 +60,7 @@ export default function HomePage() {
         </S.StatCardContainer>
         <S.MainContainer>
           {/* 왼쪽 섹션 */}
-          <S.LeftChartSection>
-            <S.LeftHeader>
-              <div>
-                <S.LeftTitle>고위험거래 추이</S.LeftTitle>
-                <S.LeftValue>$240.8K</S.LeftValue>
-              </div>
-              <S.LegendWrapper>
-                <S.LegendDot color="#D42649" />
-                <S.LegendText>고위험</S.LegendText>
-                <S.LegendDot color="#5CC8F8" />
-                <S.LegendText>전체</S.LegendText>
-                <S.DateRange>Jan 2024 - Dec 2024 ▼</S.DateRange>
-              </S.LegendWrapper>
-            </S.LeftHeader>
-
-            <S.ChartPlaceholder>Line Chart</S.ChartPlaceholder>
-          </S.LeftChartSection>
+          <HighRiskChart />
 
           {/* 오른쪽 섹션 */}
           <S.RightPanel>
@@ -80,19 +68,9 @@ export default function HomePage() {
               <S.RightHeader>
                 <S.RightTitle>체인별 고위험거래</S.RightTitle>
               </S.RightHeader>
-              <S.ChartPlaceholder>
-                <div>Bar Chart</div>
-                <S.ChainLegendWrapper>
-                  <S.LegendWrapper>
-                    <S.LegendDot color="#D42649" />
-                    <S.LegendText>Chain1</S.LegendText>
-                  </S.LegendWrapper>
-                  <S.LegendWrapper>
-                    <S.LegendDot color="#5CC8F8" />
-                    <S.LegendText>Chain2</S.LegendText>
-                  </S.LegendWrapper>
-                </S.ChainLegendWrapper>
-              </S.ChartPlaceholder>
+
+              {/* <div>Bar Chart</div> */}
+              <HighRiskByEachChain />
             </S.RightTop>
 
             <S.RightBottom>
@@ -111,7 +89,9 @@ export default function HomePage() {
                   <S.ArrowIcon src={ArrowUp} alt={"상승"} />
                 </S.RiskDiff>
               </S.RiskValueRow>
-              <S.ChartPlaceholder>Line Chart</S.ChartPlaceholder>
+              <S.ChartPlaceholder>
+                <MeanRiskScore />
+              </S.ChartPlaceholder>
             </S.RightBottom>
           </S.RightPanel>
         </S.MainContainer>
@@ -129,9 +109,10 @@ export default function HomePage() {
             </S.AnomalyHeader>
             <S.GaugePlaceholder>
               <S.GaugeContainer>
-                <S.GaugeArc $fanin={15624} $peel={5546} $scatter={2478} />
+                {/* <S.GaugeArc $fanin={15624} $peel={5546} $scatter={2478} />
                 <S.GaugeValue>23,648</S.GaugeValue>
-                <S.GaugeLabel>탐지된 이상 패턴 수</S.GaugeLabel>
+                <S.GaugeLabel>탐지된 이상 패턴 수</S.GaugeLabel> */}
+                <DetectedPatternGauge />
               </S.GaugeContainer>
             </S.GaugePlaceholder>
 

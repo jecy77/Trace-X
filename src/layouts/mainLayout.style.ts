@@ -5,7 +5,7 @@ export const Root = styled.div`
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--neutral800, #080f25);
+  background: var(--primary800, #081028);
 `;
 
 export const Content = styled.div`
