@@ -1,5 +1,7 @@
 import { useOutletContext } from "react-router";
 import * as S from "./style";
+import { dummyGraphData } from "@/data/dummyGraphData";
+import { Graph } from "@/components/adhoc/Graph";
 
 type LayoutContext = {
   title: string;
@@ -15,6 +17,7 @@ export default function AdhocPage() {
         <S.Title>{title}</S.Title>
         <S.Intro>{intro}</S.Intro>
       </S.HeaderSection>
+      <Graph data={dummyGraphData} />
     </S.Root>
   );
 }

@@ -10,8 +10,7 @@ const GlobalStyle = createGlobalStyle`
     font-family: 'Pretendard','Noto Sans KR', sans-serif;
     font-style: normal;
     line-height: normal;
-
-    box-sizing: border-box; //padding과 border가 width 안에 포함
+    box-sizing: border-box; 
   }
 
   #root {
@@ -20,6 +19,10 @@ const GlobalStyle = createGlobalStyle`
     display: flex;
     justify-content: center; 
     align-items: center;   
+  }
+
+  html {
+    overflow-x: hidden;
   }
 
   body {

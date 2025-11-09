@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 export const Root = styled.div`
   padding: 18px 50px;
+  width: 100%;
 `;
 
 export const HeaderSection = styled.div`

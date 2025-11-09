@@ -22,9 +22,9 @@ export default function DetectedPatternGauge() {
         startAngle={-90}
         endAngle={90}
         sortByValue
-        padAngle={3}
-        innerRadius={0.8}
-        cornerRadius={4}
+        padAngle={2}
+        innerRadius={0.9}
+        cornerRadius={0}
         activeOuterRadiusOffset={0}
         enableArcLinkLabels={false}
         enableArcLabels={false}
@@ -37,11 +37,11 @@ export default function DetectedPatternGauge() {
         }}
       />
 
-      {/* 📍 가운데 텍스트 */}
+      {/* 가운데 텍스트 */}
       <div
         style={{
           position: "absolute",
-          top: "54%",
+          top: "60%",
           left: "50%",
           transform: "translate(-50%, -50%)",
           textAlign: "center",

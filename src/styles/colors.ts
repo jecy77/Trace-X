@@ -1,7 +1,7 @@
 const colors = {
-  neutral800: "#080F25",
-  primary800: "#081028",
-  primary700: "#0A1330",
+  neutral800: "#080F25", // #060a1d로 변경
+  primary800: "#060c1f",
+  primary700: "#0a112bff",
   primary600: "#0B1739",
   secondary: "#1C2C59",
   secondary200: "#343b4f",

@@ -1,5 +1,6 @@
 import { ResponsiveLine } from "@nivo/line";
 import * as S from "./style/highRiskChart";
+import { useState } from "react";
 
 type DataPoint = { x: string; y: number };
 
@@ -11,11 +12,14 @@ interface HighRiskChartProps {
 }
 
 export default function HighRiskChart({ data }: HighRiskChartProps) {
-  // 🔹 K 단위 포맷
+  // K 단위 포맷
   const formatK = (num: number) =>
     num >= 1000 ? `${(num / 1000).toFixed(1)}k` : `${num}`;
 
-  // 🔹 더미 데이터
+  // 선택 연도
+  const [selectedYear, setSelectedYear] = useState(2024);
+
+  // 더미 데이터
   const dummyData = {
     highRisk: [
       { x: "Jan", y: 0 },
@@ -72,7 +76,16 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
           <S.LegendText>고위험</S.LegendText>
           <S.LegendDot color="#5CC8F8" />
           <S.LegendText>전체</S.LegendText>
-          <S.DateRange>Jan 2024 - Dec 2024 ▼</S.DateRange>
+          <S.YearSelect
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+          >
+            {[2022, 2023, 2024, 2025].map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </S.YearSelect>
         </S.LegendWrapper>
       </S.LeftHeader>
 

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Root = styled.div`
   padding: 18px 50px;
-  width: 80%;
+  width: 100%;
 `;
 
 export const HeaderSection = styled.div`
@@ -37,7 +37,7 @@ export const FilterSection = styled.div`
 // `;
 
 export const FilterButton = styled.button`
-  background: #0a1330;
+  background: #0b0f1d;
   border: none;
   color: #aeb9e1;
   border-radius: 6px;
@@ -67,7 +67,7 @@ export const Table = styled.table`
   overflow: hidden;
 
   thead {
-    background: #111a3a;
+    background: var(--neutral800);
     color: #aeb9e1;
   }
 
@@ -147,11 +147,10 @@ export const FilterBar = styled.div`
 export const FilterGroup = styled.div`
   display: flex;
   align-items: center;
-  gap: 0; /* gap 대신 선으로 간격 표현 */
-  background: #0b1435;
+  gap: 0;
+  background: #091027;
   border: 1px solid #1f294b;
   border-radius: 10px;
-  overflow: hidden; /* 라운드 모서리 안에서 선이 잘리도록 */
   max-width: 500px;
 `;
 
@@ -189,29 +188,50 @@ export const Divider = styled.div`
 
 export const DropdownWrapper = styled.div`
   position: relative;
+  overflow: visible;
+  z-index: 50;
 `;
 
 export const DropdownMenu = styled.ul`
   position: absolute;
   top: 34px;
   left: 0;
-  width: 110px;
-  background: #101a3f;
+  width: 130px;
+  background: rgba(15, 23, 48, 0.95); /* 반투명 느낌 */
   border: 1px solid #2a355a;
-  border-radius: 6px;
+  border-radius: 8px;
   list-style: none;
-  padding: 5px 0;
-  z-index: 10;
+  padding: 6px 0;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px); /* 유리 느낌(optional) */
+  animation: fadeIn 0.15s ease-out;
+  z-index: 200;
 
   li {
-    color: #aeb9e1;
-    padding: 6px 12px;
+    padding: 8px 14px;
     font-size: 12px;
+    color: #c8d0f0;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: all 0.15s ease;
 
     &:hover {
       background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+    }
+
+    &:active {
+      background: rgba(255, 255, 255, 0.15);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(-5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 `;

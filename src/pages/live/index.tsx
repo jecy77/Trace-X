@@ -1,7 +1,6 @@
 import { useOutletContext } from "react-router";
 import * as S from "./style";
 import { useState } from "react";
-// import FilterIcon from "@/assets/icon_filter.svg";
 
 type LayoutContext = {
   title: string;
@@ -13,19 +12,30 @@ type TxData = {
   from: string;
   to: string;
   amount: string;
+  token: string;
   timestamp: string;
   pattern: string;
   risk: string;
   score: number;
 };
 
+const abnormalPatterns = [
+  "Fan-in",
+  "Fan-out",
+  "Wash Trading",
+  "Mixing",
+  "Peeling",
+];
+const tokens = ["ETH", "USDT", "USDC", "BTC", "DAI"];
+
 const dummyData: TxData[] = Array.from({ length: 50 }, (_, i) => ({
   id: (i + 1).toString().padStart(5, "0"),
   from: "0x1a...e2b",
   to: "0x9f...d41",
-  amount: "10,000",
+  amount: `${(Math.random() * 10000 + 1000).toFixed(0)}`,
+  token: tokens[i % tokens.length],
   timestamp: `0${(i % 9) + 1} Sep 2019`,
-  pattern: ["Electric", "Book", "Medicine", "Mobile", "Watch"][i % 5],
+  pattern: abnormalPatterns[i % abnormalPatterns.length],
   risk: ["위험", "경고", "안전"][i % 3],
   score: [0.85, 0.72, 0.33][i % 3],
 }));
@@ -36,7 +46,6 @@ export default function LivePage() {
   const [selectedChain, setSelectedChain] = useState("전체");
   const [selectedType, setSelectedType] = useState("전체");
   const [selectedRisk, setSelectedRisk] = useState("전체");
-
   const [openMenu, setOpenMenu] = useState<null | "chain" | "type" | "risk">(
     null
   );
@@ -44,7 +53,7 @@ export default function LivePage() {
   const itemsPerPage = 10;
 
   const filteredData = dummyData.filter((tx) => {
-    const chainMatch = selectedChain === "전체" || tx.pattern === selectedChain;
+    const chainMatch = selectedChain === "전체" || tx.token === selectedChain;
     const typeMatch = selectedType === "전체" || tx.pattern === selectedType;
     const riskMatch = selectedRisk === "전체" || tx.risk === selectedRisk;
     return chainMatch && typeMatch && riskMatch;
@@ -72,22 +81,22 @@ export default function LivePage() {
       <S.FilterBar>
         <S.FilterGroup>
           <S.FilterByButton>
-            {/* <img src={FilterIcon} alt="filter" /> */}
             <div>Img</div>
             <span>Filter By</span>
           </S.FilterByButton>
 
           <S.Divider />
 
+          {/* 토큰 필터 */}
           <S.DropdownWrapper>
             <S.FilterSelect
               onClick={() => setOpenMenu(openMenu === "chain" ? null : "chain")}
             >
-              체인 ({selectedChain}) ▼
+              토큰 ({selectedChain}) ▼
             </S.FilterSelect>
             {openMenu === "chain" && (
               <S.DropdownMenu>
-                {["전체", "ETH", "TRON", "BSC"].map((c) => (
+                {["전체", "ETH", "USDT", "USDC", "BTC", "DAI"].map((c) => (
                   <li key={c} onClick={() => handleSelect("chain", c)}>
                     {c}
                   </li>
@@ -98,15 +107,16 @@ export default function LivePage() {
 
           <S.Divider />
 
+          {/* 이상 패턴 필터 */}
           <S.DropdownWrapper>
             <S.FilterSelect
               onClick={() => setOpenMenu(openMenu === "type" ? null : "type")}
             >
-              거래 유형 ({selectedType}) ▼
+              이상 패턴 ({selectedType}) ▼
             </S.FilterSelect>
             {openMenu === "type" && (
               <S.DropdownMenu>
-                {["전체", "입금", "출금", "스왑", "브릿지"].map((t) => (
+                {["전체", ...abnormalPatterns].map((t) => (
                   <li key={t} onClick={() => handleSelect("type", t)}>
                     {t}
                   </li>
@@ -117,11 +127,12 @@ export default function LivePage() {
 
           <S.Divider />
 
+          {/* 리스크 필터 */}
           <S.DropdownWrapper>
             <S.FilterSelect
               onClick={() => setOpenMenu(openMenu === "risk" ? null : "risk")}
             >
-              리스크 범위 ({selectedRisk}) ▼
+              리스크 ({selectedRisk}) ▼
             </S.FilterSelect>
             {openMenu === "risk" && (
               <S.DropdownMenu>
@@ -146,6 +157,7 @@ export default function LivePage() {
             <th>From</th>
             <th>To</th>
             <th>Amount</th>
+            <th>Token</th>
             <th>TimeStamp</th>
             <th>Pattern</th>
             <th>Risk</th>
@@ -158,6 +170,7 @@ export default function LivePage() {
               <td>{tx.from}</td>
               <td>{tx.to}</td>
               <td>{tx.amount}</td>
+              <td>{tx.token}</td>
               <td>{tx.timestamp}</td>
               <td>{tx.pattern}</td>
               <td>

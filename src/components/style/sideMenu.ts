@@ -24,7 +24,7 @@ export const MenuItem = styled(NavLink)`
   text-decoration: none;
 
   &.active {
-    background: var(--primary700, #0a1330);
+    background: var(--primary700);
     padding: 14px 18.5px;
     color: var(--point600, #d42649);
     border-left: 3px solid var(--point600, #d42649);

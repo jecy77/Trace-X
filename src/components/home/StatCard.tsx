@@ -1,4 +1,3 @@
-// components/dashboard/StatCard.tsx
 import styled from "styled-components";
 import ArrowUp from "@/assets/icon_arrow_up.svg";
 import ArrowDown from "@/assets/icon_arrow_down.svg";
@@ -45,7 +44,7 @@ const Card = styled.div`
   height: 100px;
   border-radius: 8px;
   border: 0.6px solid var(--secondary200, #343b4f);
-  background: var(--neutral800, #080f25);
+  background: var(--neutral800, #060a1d);
   padding: 20px;
   display: flex;
   flex-direction: column;

@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 export const Root = styled.div`
   padding: 18px 50px;
-  width: 80%;
+  width: 100%;
   overflow-y: scroll;
 `;
 
@@ -51,7 +51,7 @@ export const MainContainer = styled.div`
   grid-template-columns: 2fr 1fr;
   border-radius: 8px;
   border: 1px solid var(--secondary200, #343b4f);
-  background: var(--neutral800, #080f25);
+  background: var(--neutral800, #060a1d);
 `;
 
 /* -------------------- 오른쪽 섹션 -------------------- */
@@ -202,7 +202,7 @@ export const AnomalyCard = styled.div`
   height: 100%;
   border-radius: 8px;
   border: 1px solid var(--secondary200, #343b4f);
-  background: var(--primary800, #081028);
+  background: var(--neutral800, #060a1d);
   padding: 30px 32px;
   display: flex;
   flex-direction: column;

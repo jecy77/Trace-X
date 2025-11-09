@@ -2,7 +2,6 @@ import { Route, Routes } from "react-router";
 import DemoPage from "./pages/demo";
 import MainLayout from "./layouts/MainLayout";
 import HomePage from "./pages/home";
-import TransactionDetail from "./pages/transaction/detail";
 import AdhocPage from "./pages/adhoc";
 import LivePage from "./pages/live";
 import ReportPage from "./pages/report";
@@ -18,7 +17,6 @@ function App() {
           <Route path="adhoc" element={<AdhocPage />} />
           <Route path="report" element={<ReportPage />} />
           <Route path="case" element={<CasePage />} />
-          <Route path="tx" element={<TransactionDetail />} />
         </Route>
         <Route path="demo" element={<DemoPage />} />
       </Routes>
