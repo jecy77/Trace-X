@@ -281,19 +281,29 @@ export const Table = styled.table`
   }
 `;
 
-export const TableRow = styled.tr<{ $risk: string }>`
-  background: ${({ $risk }) =>
-    $risk === "위험"
-      ? "var(--point500, #7E2739)" // 위험일 때 붉은 배경
-      : "rgba(255, 255, 255, 0.03)"};
+// export const TableRow = styled.tr<{ $risk: string }>`
+//   background: ${({ $risk }) =>
+//     $risk === "위험"
+//       ? "var(--point500, #7E2739)" // 위험일 때 붉은 배경
+//       : "rgba(255, 255, 255, 0.03)"};
+//   transition: background 0.2s ease;
+//   cursor: pointer;
+
+//   &:hover {
+//     background: ${({ $risk }) =>
+//       $risk === "위험"
+//         ? "rgba(126, 39, 57, 0.85)"
+//         : "rgba(255, 255, 255, 0.08)"};
+//   }
+// `;
+
+export const TableRow = styled.tr`
+  background: rgba(255, 255, 255, 0.03);
   transition: background 0.2s ease;
-  cursor: pointer;
+  /* cursor: pointer; */
 
   &:hover {
-    background: ${({ $risk }) =>
-      $risk === "위험"
-        ? "rgba(126, 39, 57, 0.85)"
-        : "rgba(255, 255, 255, 0.08)"};
+    background: rgba(255, 255, 255, 0.08);
   }
 `;
 

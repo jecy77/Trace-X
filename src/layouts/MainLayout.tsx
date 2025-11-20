@@ -9,7 +9,7 @@ export default function MainLayout() {
   const currentPath = location.pathname;
 
   // 현재 경로와 일치하는 메뉴 객체 찾기
-  const currentMenu = menu.find((m) => m.path === currentPath);
+  const currentMenu = menu.find((m) => currentPath.startsWith(m.path));
 
   const contextValue = {
     title: currentMenu?.engTitle ?? "",

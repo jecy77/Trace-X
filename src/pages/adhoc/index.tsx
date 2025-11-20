@@ -1,23 +1,33 @@
-import { useOutletContext } from "react-router";
+import { useNavigate } from "react-router";
 import * as S from "./style";
-import { dummyGraphData } from "@/data/dummyGraphData";
-import { Graph } from "@/components/adhoc/Graph";
+import { useState } from "react";
+import SearchBar from "@/components/SearchBar";
 
-type LayoutContext = {
-  title: string;
-  intro: string;
-};
+export default function AdhocSearchPage() {
+  const navigate = useNavigate();
+  const [value, setValue] = useState("");
 
-export default function AdhocPage() {
-  const { title, intro } = useOutletContext<LayoutContext>();
+  const handleSearch = () => {
+    if (!value) return;
+    navigate(`/adhoc/result?tx=${encodeURIComponent(value)}`);
+  };
 
   return (
     <S.Root>
+      {/* 왼쪽 상단 헤더 */}
       <S.HeaderSection>
-        <S.Title>{title}</S.Title>
-        <S.Intro>{intro}</S.Intro>
+        <div>
+          <S.Title>Ad-hoc 분석</S.Title>
+          <S.Intro style={{ paddingTop: "5px" }}>
+            입력하신 트랜잭션의 흐름을 분석합니다.
+          </S.Intro>
+        </div>
       </S.HeaderSection>
-      <Graph data={dummyGraphData} />
+
+      {/* 화면 중앙 서치바 */}
+      <S.CenterBox>
+        <SearchBar value={value} onChange={setValue} onSearch={handleSearch} />
+      </S.CenterBox>
     </S.Root>
   );
 }

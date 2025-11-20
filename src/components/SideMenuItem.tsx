@@ -1,4 +1,5 @@
 import * as S from "./style/sideMenu";
+import { useLocation } from "react-router";
 
 type SideMenuItemProps = {
   title: string;
@@ -13,14 +14,18 @@ export function SideMenuItem({
   activeIcon,
   path,
 }: SideMenuItemProps) {
+  const location = useLocation();
+  const currentPath = location.pathname;
+
+  const isActive =
+    path === "/"
+      ? currentPath === "/" // 홈은 정확히 "/"일 때만
+      : currentPath.startsWith(path);
+
   return (
-    <S.MenuItem to={path} end>
-      {({ isActive }: { isActive: boolean }) => (
-        <>
-          <S.MenuIcon src={isActive ? activeIcon : icon} alt={title} />
-          <div>{title}</div>
-        </>
-      )}
+    <S.MenuItem to={path}>
+      <S.MenuIcon src={isActive ? activeIcon : icon} alt={title} />
+      <div>{title}</div>
     </S.MenuItem>
   );
 }

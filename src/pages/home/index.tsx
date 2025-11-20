@@ -66,7 +66,7 @@ export default function HomePage() {
           <S.RightPanel>
             <S.RightTop>
               <S.RightHeader>
-                <S.RightTitle>체인별 고위험거래</S.RightTitle>
+                <S.RightTitle>월별 체인 고위험거래</S.RightTitle>
               </S.RightHeader>
 
               {/* <div>Bar Chart</div> */}
@@ -141,7 +141,7 @@ export default function HomePage() {
           <S.AnomalyCard>
             <S.AnomalyHeader>
               <S.LeftTitle>최근 고액 거래</S.LeftTitle>
-              <S.FilterButton>거래량 순</S.FilterButton>
+              {/* <S.FilterButton>거래량 순</S.FilterButton> */}
             </S.AnomalyHeader>
 
             <S.Table>
@@ -149,7 +149,7 @@ export default function HomePage() {
                 <tr>
                   <th>TxHash</th>
                   <th>날짜</th>
-                  <th>리스크</th>
+                  {/* <th>리스크</th> */}
                   <th>거래량</th>
                 </tr>
               </thead>
@@ -158,50 +158,51 @@ export default function HomePage() {
                   {
                     id: "#1532",
                     date: "Dec 30, 10:06 AM",
-                    risk: "위험",
+                    // risk: "위험",
                     amount: "$329.40",
                   },
                   {
                     id: "#1531",
                     date: "Dec 29, 2:59 AM",
-                    risk: "경고",
+                    // risk: "경고",
                     amount: "$117.24",
                   },
                   {
                     id: "#1530",
                     date: "Dec 29, 1:54 AM",
-                    risk: "안전",
+                    // risk: "안전",
                     amount: "$82.16",
                   },
                   {
                     id: "#1531",
                     date: "Dec 29, 2:59 AM",
-                    risk: "경고",
+                    // risk: "경고",
                     amount: "$117.24",
                   },
                   {
                     id: "#1532",
                     date: "Dec 30, 10:06 AM",
-                    risk: "위험",
+                    // risk: "위험",
                     amount: "$329.40",
                   },
                   {
                     id: "#1531",
                     date: "Dec 29, 2:59 AM",
-                    risk: "경고",
+                    // risk: "경고",
                     amount: "$117.24",
                   },
                   {
                     id: "#1531",
                     date: "Dec 29, 2:59 AM",
-                    risk: "경고",
+                    // risk: "경고",
                     amount: "$117.24",
                   },
                 ].map((tx) => (
-                  <S.TableRow key={tx.id} $risk={tx.risk}>
+                  // <S.TableRow key={tx.id} $risk={tx.risk}>
+                  <S.TableRow key={tx.id}>
                     <td>{tx.id}</td>
                     <td>{tx.date}</td>
-                    <td>
+                    {/* <td>
                       <S.RiskTag
                         $level={
                           tx.risk === "위험"
@@ -213,7 +214,7 @@ export default function HomePage() {
                       >
                         {tx.risk}
                       </S.RiskTag>
-                    </td>
+                    </td> */}
                     <td>{tx.amount}</td>
                   </S.TableRow>
                 ))}

@@ -1,32 +1,81 @@
 import { ResponsiveBar } from "@nivo/bar";
 import * as S from "./style/highRiskByEachChain";
 
-type BarDatum = {
-  month: string;
-  Chain1: number;
-  Chain2: number;
-  Chain3: number;
-  Chain4: number;
-};
-
 interface HighRiskByEachChainProps {
-  data?: BarDatum[];
+  data?: Record<string, Record<string, number>>;
+  // ex) { "1~2월": { "Ethereum": 5, ... } }
 }
 
 export default function HighRiskByEachChain({
   data,
 }: HighRiskByEachChainProps) {
-  // 더미 데이터 (월별 체인별 거래량)
-  const dummyData: BarDatum[] = [
-    { month: "Jan", Chain1: 80, Chain2: 70, Chain3: 65, Chain4: 55 },
-    { month: "Feb", Chain1: 60, Chain2: 50, Chain3: 45, Chain4: 35 },
-    { month: "Mar", Chain1: 90, Chain2: 75, Chain3: 70, Chain4: 60 },
-    { month: "Apr", Chain1: 70, Chain2: 85, Chain3: 50, Chain4: 40 },
-    { month: "May", Chain1: 100, Chain2: 95, Chain3: 80, Chain4: 75 },
-    { month: "Jun", Chain1: 85, Chain2: 60, Chain3: 55, Chain4: 50 },
-  ];
+  // 백엔드 → 차트 데이터 변환
+  function transformChainData(raw: Record<string, Record<string, number>>) {
+    const monthMap: Record<string, string> = {
+      "1~2월": "Jan–Feb",
+      "3~4월": "Mar–Apr",
+      "5~6월": "May–Jun",
+      "7~8월": "Jul–Aug",
+      "9~10월": "Sep–Oct",
+      "11~12월": "Nov–Dec",
+    };
 
-  const chartData = data || dummyData;
+    return Object.entries(raw).map(([period, chains]) => ({
+      month: monthMap[period] ?? period,
+      ...chains,
+    }));
+  }
+
+  // 데이터가 없으면 더미 데이터 사용
+  const chartData = data
+    ? transformChainData(data)
+    : [
+        {
+          month: "1-2",
+          Ethereum: 80,
+          "Arbitrum One": 70,
+          Base: 65,
+          Solana: 55,
+        },
+        {
+          month: "3-4",
+          Ethereum: 60,
+          "Arbitrum One": 50,
+          Base: 45,
+          Solana: 35,
+        },
+        {
+          month: "5-6",
+          Ethereum: 90,
+          "Arbitrum One": 75,
+          Base: 70,
+          Solana: 60,
+        },
+        {
+          month: "7-8",
+          Ethereum: 70,
+          "Arbitrum One": 85,
+          Base: 50,
+          Solana: 40,
+        },
+        {
+          month: "9-10",
+          Ethereum: 100,
+          "Arbitrum One": 95,
+          Base: 80,
+          Solana: 75,
+        },
+        {
+          month: "11-12",
+          Ethereum: 85,
+          "Arbitrum One": 60,
+          Base: 55,
+          Solana: 50,
+        },
+      ];
+
+  // keys: 백엔드 체인명 자동 추출
+  const keys = Object.keys(chartData[0]).filter((key) => key !== "month");
 
   const colors = ["#D64A4A", "#5CC8F8", "#ffe641", "#d5a2ff"];
 
@@ -35,7 +84,7 @@ export default function HighRiskByEachChain({
       <S.Container>
         <ResponsiveBar
           data={chartData}
-          keys={["Chain1", "Chain2", "Chain3", "Chain4"]}
+          keys={keys}
           indexBy="month"
           margin={{ top: 20, right: 30, bottom: 70, left: 50 }}
           padding={0.3}
@@ -49,11 +98,22 @@ export default function HighRiskByEachChain({
             tickPadding: 10,
             tickRotation: 0,
           }}
-          //   axisLeft={{
-          //     tickSize: 0,
-          //     tickPadding: 10,
-          //     tickRotation: 0,
-          //   }}
+          tooltip={({ id, value }) => (
+            <div
+              style={{
+                padding: "8px 12px",
+                background: "rgba(10,15,35,0.9)",
+                borderRadius: "8px",
+                border: "1px solid #2a3042",
+                color: "#fff",
+                fontFamily: "Pretendard",
+                fontSize: 12,
+              }}
+            >
+              <strong>{id}</strong>
+              <div style={{ marginTop: 4, color: "#AEB9E1" }}>{value}</div>
+            </div>
+          )}
           theme={{
             background: "transparent",
             axis: {
@@ -71,53 +131,18 @@ export default function HighRiskByEachChain({
                 strokeWidth: 0.5,
               },
             },
-            tooltip: {
-              container: {
-                background: "rgba(10,15,35,0.9)",
-                color: "#fff",
-                fontSize: 13,
-                borderRadius: 8,
-                border: "1px solid #2a3042",
-                fontFamily: "Pretendard",
-              },
-            },
           }}
-          tooltip={({ id, value, indexValue }) => (
-            <div
-              style={{
-                padding: "8px 12px",
-                background: "rgba(10,15,35,0.9)",
-                borderRadius: "8px",
-                border: "1px solid #2a3042",
-              }}
-            >
-              <strong style={{ color: "#fff" }}>
-                {id}: ${value}K
-              </strong>
-              <div style={{ color: "#AEB9E1", fontSize: 11, marginTop: 4 }}>
-                {indexValue}, 2024
-              </div>
-            </div>
-          )}
         />
       </S.Container>
+
+      {/* 범례 */}
       <S.ChainLegendWrapper>
-        <S.LegendWrapper>
-          <S.LegendDot color="#D42649" />
-          <S.LegendText>Chain1</S.LegendText>
-        </S.LegendWrapper>
-        <S.LegendWrapper>
-          <S.LegendDot color="#5CC8F8" />
-          <S.LegendText>Chain2</S.LegendText>
-        </S.LegendWrapper>
-        <S.LegendWrapper>
-          <S.LegendDot color="#ffe641" />
-          <S.LegendText>Chain3</S.LegendText>
-        </S.LegendWrapper>
-        <S.LegendWrapper>
-          <S.LegendDot color="#d5a2ff" />
-          <S.LegendText>Chain4</S.LegendText>
-        </S.LegendWrapper>
+        {keys.map((chain, i) => (
+          <S.LegendWrapper key={chain}>
+            <S.LegendDot color={colors[i]} />
+            <S.LegendText>{chain}</S.LegendText>
+          </S.LegendWrapper>
+        ))}
       </S.ChainLegendWrapper>
     </>
   );
