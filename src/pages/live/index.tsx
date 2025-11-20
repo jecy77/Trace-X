@@ -39,6 +39,13 @@ type BackendTx = {
   };
 };
 
+/* -------------------- 문자열 축약 함수 추가 -------------------- */
+const shorten = (value: string, left = 6, right = 4) => {
+  if (!value) return "";
+  if (value.length <= left + right) return value;
+  return `${value.slice(0, left)}...${value.slice(-right)}`;
+};
+
 /* -------------------- 백엔드 → 프론트 매핑 함수 -------------------- */
 
 const mapBackendToTxData = (raw: BackendTx): TxData => {
@@ -47,6 +54,9 @@ const mapBackendToTxData = (raw: BackendTx): TxData => {
     Medium: "경고",
     Low: "안전",
   };
+
+  const riskLevel = raw.risk?.level ?? "Low";
+  const riskScore = raw.risk?.score ?? 0;
 
   const date = new Date(raw.timestamp * 1000);
   const formattedDate = date.toLocaleDateString("en-GB", {
@@ -63,12 +73,12 @@ const mapBackendToTxData = (raw: BackendTx): TxData => {
     token: raw.token,
     timestamp: formattedDate,
     pattern: raw.pattern,
-    risk: riskMap[raw.risk.level] || "안전",
-    score: raw.risk.score,
+    risk: riskMap[riskLevel] ?? "안전",
+    score: riskScore,
   };
 };
 
-/* -------------------- 더미 데이터 (백엔드 없으면 사용) -------------------- */
+/* -------------------- 더미 데이터 -------------------- */
 
 const dummyData: TxData[] = Array.from({ length: 20 }, (_, i) => ({
   id: `0xtxhash${i + 1}`,
@@ -84,15 +94,7 @@ const dummyData: TxData[] = Array.from({ length: 20 }, (_, i) => ({
 
 /* -------------------- 필터 옵션 -------------------- */
 
-// const abnormalPatterns = [
-//   "Fan-in",
-//   "Fan-out",
-//   "Wash Trading",
-//   "Mixing",
-//   "Peeling",
-// ];
 const tokens = ["ETH", "USDT", "USDC", "BTC", "DAI"];
-// const riskLevels = ["전체", "위험", "경고", "안전"];
 
 /* -------------------- LivePage Component -------------------- */
 
@@ -152,7 +154,7 @@ export default function LivePage() {
     }
 
     fetchData();
-  }, [selectedChain, page]); // ⬅ 필터 변경되면 다시 호출
+  }, [selectedChain, page]);
 
   /* -------------------- 필터링 -------------------- */
 
@@ -208,48 +210,6 @@ export default function LivePage() {
               </S.DropdownMenu>
             )}
           </S.DropdownWrapper>
-
-          {/* <S.Divider /> */}
-
-          {/* 이상 패턴 필터 */}
-          {/* <S.DropdownWrapper>
-            <S.FilterSelect
-              onClick={() => setOpenMenu(openMenu === "type" ? null : "type")}
-            >
-              이상 패턴 ({selectedType}) ▼
-            </S.FilterSelect>
-
-            {openMenu === "type" && (
-              <S.DropdownMenu>
-                {["전체", ...abnormalPatterns].map((t) => (
-                  <li key={t} onClick={() => handleSelect("type", t)}>
-                    {t}
-                  </li>
-                ))}
-              </S.DropdownMenu>
-            )}
-          </S.DropdownWrapper> */}
-
-          {/* <S.Divider /> */}
-
-          {/* 리스크 필터 */}
-          {/* <S.DropdownWrapper>
-            <S.FilterSelect
-              onClick={() => setOpenMenu(openMenu === "risk" ? null : "risk")}
-            >
-              리스크 ({selectedRisk}) ▼
-            </S.FilterSelect>
-
-            {openMenu === "risk" && (
-              <S.DropdownMenu>
-                {riskLevels.map((r) => (
-                  <li key={r} onClick={() => handleSelect("risk", r)}>
-                    {r}
-                  </li>
-                ))}
-              </S.DropdownMenu>
-            )}
-          </S.DropdownWrapper> */}
         </S.FilterGroup>
       </S.FilterBar>
 
@@ -272,9 +232,9 @@ export default function LivePage() {
           <tbody>
             {currentData.map((tx) => (
               <S.TableRow key={tx.id} $risk={tx.risk}>
-                <td>{tx.id}</td>
-                <td>{tx.from}</td>
-                <td>{tx.to}</td>
+                <td title={tx.id}>{shorten(tx.id)}</td>
+                <td title={tx.from}>{shorten(tx.from)}</td>
+                <td title={tx.to}>{shorten(tx.to)}</td>
                 <td>{tx.amount}</td>
                 <td>{tx.token}</td>
                 <td>{tx.timestamp}</td>
