@@ -31,28 +31,14 @@ export type GraphData = {
 };
 
 /* =========================================================
-   확장된 더미 데이터
+   더미 데이터 (fallback)
 ========================================================= */
 
-const dummyData: GraphData = {
+const fallbackDummy: GraphData = {
   nodes: [
     { id: "root", address: "0xROOT", label: "Root EOA", isContract: false },
-
-    // ─────────────── BRIDGE NODES (2개만) ───────────────
-    {
-      id: "bridgeA",
-      address: "0xBRIDGE_A",
-      label: "LayerZero Bridge",
-      isContract: false,
-    },
-    {
-      id: "bridgeB",
-      address: "0xBRIDGE_B",
-      label: "Polygon Bridge",
-      isContract: false,
-    },
-
-    // ─────────────── CHILD NODES ───────────────
+    { id: "bridgeA", address: "0xBRIDGE_A", label: "LayerZero Bridge" },
+    { id: "bridgeB", address: "0xBRIDGE_B", label: "Polygon Bridge" },
     { id: "child1", address: "0xC1", label: "EOA User C1" },
     {
       id: "child2",
@@ -71,7 +57,6 @@ const dummyData: GraphData = {
   ],
 
   edges: [
-    // root → bridges
     {
       from_address: "0xROOT",
       to_address: "0xBRIDGE_A",
@@ -88,8 +73,6 @@ const dummyData: GraphData = {
       token_symbol: "USDC",
       tx_type: "layerzero_bridge",
     },
-
-    // Bridge A Layer
     {
       from_address: "0xBRIDGE_A",
       to_address: "0xC1",
@@ -114,8 +97,6 @@ const dummyData: GraphData = {
       token_symbol: "DAI",
       tx_type: "erc20_transfer",
     },
-
-    // Bridge B Layer
     {
       from_address: "0xBRIDGE_B",
       to_address: "0xC4",
@@ -136,26 +117,19 @@ const dummyData: GraphData = {
 };
 
 /* =========================================================
-   브릿지 감지 강화
+   브릿지 감지
 ========================================================= */
 
 const isBridgeNode = (node: BackendNode, edges: BackendEdge[]) => {
   const low = (v?: string) => (v ? v.toLowerCase() : "");
 
-  // 1) label 기반
   if (low(node.label).includes("bridge")) return true;
-
-  // 2) address 기반
   if (low(node.address).includes("bridge")) return true;
 
-  // 3) tx_type 기반
   const connected = edges.filter(
     (e) => e.from_address === node.address || e.to_address === node.address
   );
-
-  if (connected.some((e) => low(e.tx_type).includes("bridge"))) return true;
-
-  return false;
+  return connected.some((e) => low(e.tx_type).includes("bridge"));
 };
 
 /* =========================================================
@@ -175,7 +149,6 @@ const CustomNode = ({ data }: any) => (
   >
     <Handle type="source" position={Position.Right} />
     <Handle type="target" position={Position.Left} />
-
     <div>{data.address}</div>
     <div style={{ fontSize: 11, opacity: 0.7 }}>
       {data.label} · {data.type}
@@ -190,11 +163,8 @@ const CustomNode = ({ data }: any) => (
 const layout = (nodes: Node[], edges: Edge[]) => {
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-
   g.setGraph({
     rankdir: "LR",
-    align: "UL",
-
     ranksep: 120,
     nodesep: 80,
     edgesep: 30,
@@ -220,13 +190,13 @@ const layout = (nodes: Node[], edges: Edge[]) => {
 };
 
 /* =========================================================
-   MAIN COMPONENT
+   MAIN (백엔드 호출 제거)
 ========================================================= */
 
-export default function Graph({ data }: { data?: GraphData }) {
-  const graph = data && data.nodes?.length > 0 ? data : dummyData;
+export default function Graph({ data }: { data?: GraphData | null }) {
+  const graph = data && data.nodes?.length ? data : fallbackDummy;
 
-  /* ---------------- 노드 ---------------- */
+  /* ---------- 노드 ---------- */
   const nodes = useMemo<Node[]>(() => {
     return graph.nodes.map((n) => {
       const bridge = isBridgeNode(n, graph.edges);
@@ -245,49 +215,31 @@ export default function Graph({ data }: { data?: GraphData }) {
     });
   }, [graph]);
 
-  /* ---------------- 엣지 ---------------- */
+  /* ---------- 엣지 ---------- */
   const edges = useMemo<Edge[]>(() => {
-    // 타임스탬프 포맷 함수 추가
-    const formatTS = (ts: number | string | undefined) => {
+    const formatTS = (ts: any) => {
       if (!ts) return "";
-
-      const date = typeof ts === "number" ? new Date(ts * 1000) : new Date(ts);
-
-      // yyyy-MM-dd HH:mm:ss 형태로 변환
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const day = String(date.getDate()).padStart(2, "0");
-      const hour = String(date.getHours()).padStart(2, "0");
-      const min = String(date.getMinutes()).padStart(2, "0");
-      const sec = String(date.getSeconds()).padStart(2, "0");
-
-      return `${year}-${month}-${day} ${hour}:${min}:${sec}`;
+      const d = new Date(typeof ts === "number" ? ts * 1000 : ts);
+      return d.toISOString().replace("T", " ").substring(0, 19);
     };
 
-    return graph.edges.map((e, i) => {
-      const ts = formatTS(e.timestamp);
-
-      return {
-        id: `edge-${i}`,
-        source: graph.nodes.find((n) => n.address === e.from_address)?.id ?? "",
-        target: graph.nodes.find((n) => n.address === e.to_address)?.id ?? "",
-        style: { stroke: "#767676", strokeWidth: 2, zIndex: 10 },
-        markerEnd: { type: MarkerType.Arrow, color: "#767676" },
-        label: `⏱ ${ts} | ${e.token_symbol ?? ""} · ${e.amount}`,
-        labelStyle: { fill: "#fff", fontSize: 10 },
-        labelBgStyle: {
-          fill: "rgba(89, 89, 89, 0.323)",
-          borderRadius: 4,
-        },
-        labelBgPadding: [6, 4],
-      };
-    });
+    return graph.edges.map((e, i) => ({
+      id: `edge-${i}`,
+      source: graph.nodes.find((n) => n.address === e.from_address)?.id ?? "",
+      target: graph.nodes.find((n) => n.address === e.to_address)?.id ?? "",
+      style: { stroke: "#767676", strokeWidth: 2 },
+      markerEnd: { type: MarkerType.Arrow, color: "#767676" },
+      label: `⏱ ${formatTS(e.timestamp)} | ${e.token_symbol ?? ""} · ${
+        e.amount
+      }`,
+      labelStyle: { fill: "#fff", fontSize: 10 },
+      labelBgStyle: { fill: "rgba(89, 89, 89, 0.32)", borderRadius: 4 },
+      labelBgPadding: [6, 4],
+    }));
   }, [graph]);
 
-  /* ---------------- Layout 적용 ---------------- */
   const layouted = useMemo(() => layout(nodes, edges), [nodes, edges]);
 
-  /* ---------------- 브릿지 노드 리스트 ---------------- */
   const bridgeNodes = nodes.filter((n) => n.data.type === "Bridge");
 
   return (
@@ -308,7 +260,7 @@ export default function Graph({ data }: { data?: GraphData }) {
         style={{ background: "transparent" }}
       />
 
-      {/* 브릿지별 버튼 출력 */}
+      {/* 브릿지 버튼 출력 */}
       <div
         style={{
           position: "absolute",
@@ -326,30 +278,14 @@ export default function Graph({ data }: { data?: GraphData }) {
               display: "flex",
               alignItems: "center",
               gap: "8px",
-
               padding: "10px 14px",
-
               borderRadius: "8px",
-
               background: "#233157",
               border: "1px solid #0B1739",
-
               color: "#FFFFFF",
               fontSize: "13px",
               fontWeight: 500,
-
-              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
-
               cursor: "pointer",
-              transition: "all 0.15s ease-in-out",
-            }}
-            onMouseEnter={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                "#263A7A";
-            }}
-            onMouseLeave={(e) => {
-              (e.currentTarget as HTMLButtonElement).style.background =
-                "#1C2C59";
             }}
             onClick={() => console.log("브릿지 탐색:", b.data.address)}
           >

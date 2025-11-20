@@ -1,23 +1,35 @@
 import { useSearchParams, useNavigate } from "react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as S from "./style";
 import SearchBar from "@/components/SearchBar";
-
-// import { dummyGraphData } from "@/data/dummyGraphData";
 import Graph from "@/components/adhoc/Graph";
+import { getFundFlow } from "@/api/getFundFlow";
 
 export default function AdhocResultPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
   const [value, setValue] = useState(params.get("tx") || "");
+  const [graphData, setGraphData] = useState(null);
 
+  /* ---------------- 검색 시 URL 갱신 ---------------- */
   const handleSearch = () => {
     if (!value) return;
     navigate(`/adhoc/result?tx=${value}`);
   };
 
-  //   const tx = params.get("tx");
+  /* ---------------- URL(tx)이 변경되면 API 호출 ---------------- */
+  useEffect(() => {
+    const tx = params.get("tx");
+    if (!tx) return;
+
+    const fetchData = async () => {
+      const data = await getFundFlow(tx); // 실패 시 null 리턴하는 구조 추천
+      setGraphData(data); // Graph 안에서 fallbackDummy로 처리됨
+    };
+
+    fetchData();
+  }, [params]);
 
   return (
     <S.Root>
@@ -33,7 +45,7 @@ export default function AdhocResultPage() {
       </S.HeaderSection>
 
       {/* 그래프 */}
-      <Graph />
+      <Graph data={graphData} />
     </S.Root>
   );
 }
