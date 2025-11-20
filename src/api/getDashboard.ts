@@ -40,14 +40,13 @@ export const getDashboardSummary = async (chainId?: string) => {
     const res = await api.get<DashboardSummaryResponse>(
       "/api/dashboard/summary",
       {
-        params: chainId ? { chainId } : undefined,
+        params: chainId ? { chain_id: chainId } : undefined, // ⭐ 변경!
       }
     );
 
-    // 정상 응답
     return res.data.data;
   } catch (error: any) {
-    // Axios 오류
+    // 서버 응답 오류
     if (error.response) {
       console.error(
         "[Dashboard API Error] 서버 응답 오류:",
@@ -59,7 +58,7 @@ export const getDashboardSummary = async (chainId?: string) => {
       );
     }
 
-    // 요청은 갔지만 응답이 없음
+    // 응답 없음
     if (error.request) {
       console.error("[Dashboard API Error] 응답 없음:", error.request);
       throw new Error("서버가 응답하지 않습니다.");

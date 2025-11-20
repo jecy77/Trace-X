@@ -1,50 +1,75 @@
 import { useOutletContext } from "react-router";
 import * as S from "./style";
 import ArrowUp from "@/assets/icon_arrow_up.svg";
-// import ArrowDown from "@/assets/icon_arrow_down.svg";
-
-type LayoutContext = {
-  title: string;
-  intro: string;
-};
 
 import icon_amount from "@/assets/icon_total_amount.svg";
 import icon_num from "@/assets/icon_total_num.svg";
 import icon_danger from "@/assets/icon_danger.svg";
 import icon_warning from "@/assets/icon_warning.svg";
+
 import StatCard from "@/components/home/StatCard";
 import HighRiskChart from "@/components/home/HighRiskChart";
 import HighRiskByEachChain from "@/components/home/HighRiskByEachChain";
 import MeanRiskScore from "@/components/home/MeanRiskScore";
 import DetectedPatternGauge from "@/components/home/DetectedPatternGauge";
 
+import { useEffect, useState } from "react";
+import { getMonitoring } from "@/api/getMonitoring";
+import { getDashboardSummary } from "@/api/getDashboard";
+
+type LayoutContext = {
+  title: string;
+  intro: string;
+};
+
 export default function HomePage() {
   const { title, intro } = useOutletContext<LayoutContext>();
 
-  const stats = [
-    {
-      title: "총 거래량",
-      value: "$240.8K",
-      diff: 28.4,
-      isUp: true,
-      icon: icon_amount,
-    },
-    { title: "총 거래수", value: 206, diff: 12.6, isUp: false, icon: icon_num },
-    {
-      title: "고위험 거래수",
-      value: 25,
-      diff: 3.1,
-      isUp: true,
-      icon: icon_danger,
-    },
-    {
-      title: "경고 거래수",
-      value: 73,
-      diff: 11.3,
-      isUp: true,
-      icon: icon_warning,
-    },
+  // 🔥 대시보드 상태
+  const [summary, setSummary] = useState<any>(null);
+
+  // 모니터링 테이블 상태
+  const dummyMonitoring = [
+    { txHash: "#1532", timestamp: "Dec 30, 10:06 AM", value: "$329.40" },
+    { txHash: "#1531", timestamp: "Dec 29, 2:59 AM", value: "$117.24" },
+    { txHash: "#1530", timestamp: "Dec 29, 1:54 AM", value: "$82.16" },
   ];
+
+  const [monitoring, setMonitoring] = useState(dummyMonitoring);
+
+  /* -----------------------------------------------
+      📌 대시보드 요약 데이터 호출
+  ------------------------------------------------- */
+  useEffect(() => {
+    async function loadSummary() {
+      try {
+        const res = await getDashboardSummary();
+        setSummary(res);
+      } catch (err) {
+        console.error("Dashboard summary error:", err);
+      }
+    }
+    loadSummary();
+  }, []);
+
+  /* -----------------------------------------------
+      📌 최근 고액 거래
+  ------------------------------------------------- */
+  useEffect(() => {
+    async function loadMonitoring() {
+      try {
+        const res = await getMonitoring();
+        if (res?.RecentHighValueTransfers?.length > 0) {
+          setMonitoring(res.RecentHighValueTransfers);
+        } else {
+          setMonitoring(dummyMonitoring);
+        }
+      } catch {
+        setMonitoring(dummyMonitoring);
+      }
+    }
+    loadMonitoring();
+  }, []);
 
   return (
     <S.Root>
@@ -52,66 +77,116 @@ export default function HomePage() {
         <S.Title>{title}</S.Title>
         <S.Intro>{intro}</S.Intro>
       </S.HeaderSection>
+
+      {/* ============================
+          STAT CARDS
+      ============================ */}
       <S.ContentSection>
         <S.StatCardContainer>
-          {stats.map((stat) => (
-            <StatCard key={stat.title} {...stat} />
-          ))}
+          {summary ? (
+            <>
+              <StatCard
+                title="총 거래량"
+                value={summary.totalVolume.value.toLocaleString()}
+                diff={parseFloat(summary.totalVolume.changeRate)}
+                isUp={summary.totalVolume.changeRate.startsWith("+")}
+                icon={icon_amount}
+              />
+              <StatCard
+                title="총 거래수"
+                value={summary.totalTransactions.value.toLocaleString()}
+                diff={parseFloat(summary.totalTransactions.changeRate)}
+                isUp={summary.totalTransactions.changeRate.startsWith("+")}
+                icon={icon_num}
+              />
+              <StatCard
+                title="고위험 거래수"
+                value={summary.highRiskTransactions.value.toLocaleString()}
+                diff={parseFloat(summary.highRiskTransactions.changeRate)}
+                isUp={summary.highRiskTransactions.changeRate.startsWith("+")}
+                icon={icon_danger}
+              />
+              <StatCard
+                title="경고 거래수"
+                value={summary.warningTransactions.value.toLocaleString()}
+                diff={parseFloat(summary.warningTransactions.changeRate)}
+                isUp={summary.warningTransactions.changeRate.startsWith("+")}
+                icon={icon_warning}
+              />
+            </>
+          ) : (
+            <>로딩중...</>
+          )}
         </S.StatCardContainer>
-        <S.MainContainer>
-          {/* 왼쪽 섹션 */}
-          <HighRiskChart />
 
-          {/* 오른쪽 섹션 */}
+        {/* ============================
+            MAIN GRAPHS
+        ============================ */}
+        <S.MainContainer>
+          {/* 왼쪽: 고위험 거래 추이 */}
+          <HighRiskChart data={summary?.highRiskTransactionTrend} />
+
+          {/* 오른쪽 패널 */}
           <S.RightPanel>
             <S.RightTop>
               <S.RightHeader>
                 <S.RightTitle>월별 체인 고위험거래</S.RightTitle>
               </S.RightHeader>
 
-              {/* <div>Bar Chart</div> */}
-              <HighRiskByEachChain />
+              <HighRiskByEachChain
+                data={summary?.highRiskTransactionsByChain}
+              />
             </S.RightTop>
 
             <S.RightBottom>
               <S.RightHeader>
                 <S.RightTitle>평균 리스크 점수</S.RightTitle>
               </S.RightHeader>
+
               <S.RiskValueRow>
-                <S.RiskValue>0.3</S.RiskValue>
-                {/* <S.RiskDiff $isUp={isUp}> */}
+                <S.RiskValue>
+                  {/* 평균 계산 */}
+                  {summary
+                    ? (
+                        Object.values(summary.averageRiskScore).reduce(
+                          (a, b) => a + b,
+                          0
+                        ) / Object.values(summary.averageRiskScore).length
+                      ).toFixed(2)
+                    : "0.0"}
+                </S.RiskValue>
+
                 <S.RiskDiff $isUp>
                   <div>3.1%</div>
-                  {/* <S.ArrowIcon
-            src={isUp ? ArrowUp : ArrowDown}
-            alt={isUp ? "상승" : "하락"}
-          /> */}
-                  <S.ArrowIcon src={ArrowUp} alt={"상승"} />
+                  <S.ArrowIcon src={ArrowUp} alt="상승" />
                 </S.RiskDiff>
               </S.RiskValueRow>
+
               <S.ChartPlaceholder>
-                <MeanRiskScore />
+                <MeanRiskScore data={summary?.averageRiskScore} />
               </S.ChartPlaceholder>
             </S.RightBottom>
           </S.RightPanel>
         </S.MainContainer>
       </S.ContentSection>
+
+      {/* ============================
+          ANOMALY SECTION
+      ============================ */}
       <S.HeaderSection>
         <S.Title>이상 패턴 및 거래 모니터링</S.Title>
       </S.HeaderSection>
 
       <S.AnomalySection>
-        {/* 이상 패턴 차트 */}
+        {/* 왼쪽: 패턴 */}
         <S.AnomalyLeft>
           <S.AnomalyCard>
             <S.AnomalyHeader>
               <S.LeftTitle>탐지된 이상 패턴 수</S.LeftTitle>
             </S.AnomalyHeader>
+
             <S.GaugePlaceholder>
               <S.GaugeContainer>
-                {/* <S.GaugeArc $fanin={15624} $peel={5546} $scatter={2478} />
-                <S.GaugeValue>23,648</S.GaugeValue>
-                <S.GaugeLabel>탐지된 이상 패턴 수</S.GaugeLabel> */}
                 <DetectedPatternGauge />
               </S.GaugeContainer>
             </S.GaugePlaceholder>
@@ -122,11 +197,13 @@ export default function HomePage() {
                 <S.PatternText>Fan-in</S.PatternText>
                 <S.PatternValue>15,624</S.PatternValue>
               </S.PatternItem>
+
               <S.PatternItem>
                 <S.LegendDot color="#5CC8F8" />
                 <S.PatternText>Peel Chain</S.PatternText>
                 <S.PatternValue>5,546</S.PatternValue>
               </S.PatternItem>
+
               <S.PatternItem>
                 <S.LegendDot color="#847AFF" />
                 <S.PatternText>Scatter Gather</S.PatternText>
@@ -136,12 +213,11 @@ export default function HomePage() {
           </S.AnomalyCard>
         </S.AnomalyLeft>
 
-        {/* 최근 고위험 거래 테이블 */}
+        {/* 오른쪽: 최근 고액 거래 */}
         <S.AnomalyRight>
           <S.AnomalyCard>
             <S.AnomalyHeader>
               <S.LeftTitle>최근 고액 거래</S.LeftTitle>
-              {/* <S.FilterButton>거래량 순</S.FilterButton> */}
             </S.AnomalyHeader>
 
             <S.Table>
@@ -149,73 +225,16 @@ export default function HomePage() {
                 <tr>
                   <th>TxHash</th>
                   <th>날짜</th>
-                  {/* <th>리스크</th> */}
                   <th>거래량</th>
                 </tr>
               </thead>
+
               <tbody>
-                {[
-                  {
-                    id: "#1532",
-                    date: "Dec 30, 10:06 AM",
-                    // risk: "위험",
-                    amount: "$329.40",
-                  },
-                  {
-                    id: "#1531",
-                    date: "Dec 29, 2:59 AM",
-                    // risk: "경고",
-                    amount: "$117.24",
-                  },
-                  {
-                    id: "#1530",
-                    date: "Dec 29, 1:54 AM",
-                    // risk: "안전",
-                    amount: "$82.16",
-                  },
-                  {
-                    id: "#1531",
-                    date: "Dec 29, 2:59 AM",
-                    // risk: "경고",
-                    amount: "$117.24",
-                  },
-                  {
-                    id: "#1532",
-                    date: "Dec 30, 10:06 AM",
-                    // risk: "위험",
-                    amount: "$329.40",
-                  },
-                  {
-                    id: "#1531",
-                    date: "Dec 29, 2:59 AM",
-                    // risk: "경고",
-                    amount: "$117.24",
-                  },
-                  {
-                    id: "#1531",
-                    date: "Dec 29, 2:59 AM",
-                    // risk: "경고",
-                    amount: "$117.24",
-                  },
-                ].map((tx) => (
-                  // <S.TableRow key={tx.id} $risk={tx.risk}>
-                  <S.TableRow key={tx.id}>
-                    <td>{tx.id}</td>
-                    <td>{tx.date}</td>
-                    {/* <td>
-                      <S.RiskTag
-                        $level={
-                          tx.risk === "위험"
-                            ? "high"
-                            : tx.risk === "경고"
-                            ? "mid"
-                            : "low"
-                        }
-                      >
-                        {tx.risk}
-                      </S.RiskTag>
-                    </td> */}
-                    <td>{tx.amount}</td>
+                {monitoring.map((item, idx) => (
+                  <S.TableRow key={item.txHash + idx}>
+                    <td>{item.txHash}</td>
+                    <td>{item.timestamp}</td>
+                    <td>{item.value}</td>
                   </S.TableRow>
                 ))}
               </tbody>
