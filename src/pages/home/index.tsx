@@ -145,14 +145,14 @@ export default function HomePage() {
 
               <S.RiskValueRow>
                 <S.RiskValue>
-                  {/* 평균 계산 */}
                   {summary
-                    ? (
-                        Object.values(summary.averageRiskScore).reduce(
-                          (a, b) => a + b,
-                          0
-                        ) / Object.values(summary.averageRiskScore).length
-                      ).toFixed(2)
+                    ? (() => {
+                        const arr = Object.values(
+                          summary.averageRiskScore
+                        ) as number[];
+                        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+                        return avg.toFixed(2);
+                      })()
                     : "0.0"}
                 </S.RiskValue>
 
