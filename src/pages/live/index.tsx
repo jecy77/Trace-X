@@ -116,11 +116,25 @@ export default function LivePage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const res = await fetch("/api/live");
+        const params = new URLSearchParams();
+
+        if (selectedChain !== "전체")
+          params.append("tokenFilter", selectedChain);
+        params.append("pageNo", String(page));
+
+        const url = `${
+          import.meta.env.VITE_API_URL
+        }/api/live-detection/summary?${params.toString()}`;
+
+        const res = await fetch(url);
+
+        if (!res.ok) {
+          throw new Error(`HTTP Error! status: ${res.status}`);
+        }
+
         const json = await res.json();
 
         if (!json.data || json.data.length === 0) {
-          // 🔥 백엔드 응답은 성공했지만 데이터 없음 → 더미로 대체
           console.warn("No API data. Using dummyData.");
           setData(dummyData);
         } else {
@@ -130,7 +144,6 @@ export default function LivePage() {
           setData(mappedData);
         }
       } catch (error) {
-        // 🔥 백엔드 호출 실패 → 더미 데이터 사용
         console.error("API fetch error, using dummyData:", error);
         setData(dummyData);
       } finally {
@@ -139,7 +152,7 @@ export default function LivePage() {
     }
 
     fetchData();
-  }, []);
+  }, [selectedChain, page]); // ⬅ 필터 변경되면 다시 호출
 
   /* -------------------- 필터링 -------------------- */
 
