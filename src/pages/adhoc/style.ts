@@ -48,13 +48,13 @@ export const ModeButton = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   background: ${(props) =>
     props.$active
-      ? "var(--primary500, #7c8dd8)"
+      ? "var(--red300, #FF5A65)"
       : "var(--neutral800, #060a1d)"};
   color: var(--white, #fff);
   border: 1px solid
     ${(props) =>
       props.$active
-        ? "var(--primary500, #7c8dd8)"
+        ? "var(--red300, #FF5A65)"
         : "var(--secondary200, #343b4f)"};
   border-radius: 8px;
   font-size: 14px;
@@ -66,9 +66,10 @@ export const ModeButton = styled.button<{ $active: boolean }>`
   &:hover {
     background: ${(props) =>
       props.$active
-        ? "var(--primary600, #6b7bc7)"
+        ? "#FF6B7F"
         : "var(--secondary200, #343b4f)"};
-    border-color: var(--primary500, #7c8dd8);
+    border-color: ${(props) =>
+      props.$active ? "var(--red300, #FF5A65)" : "var(--secondary200, #343b4f)"};
   }
 `;
 
@@ -192,13 +193,13 @@ export const ExpandButton = styled.button<{ primary?: boolean }>`
   padding: 10px 24px;
   background: ${(props) =>
     props.primary
-      ? "var(--primary500, #7c8dd8)"
+      ? "var(--red300, #FF5A65)"
       : "var(--neutral800, #060a1d)"};
   color: var(--white, #fff);
   border: 1px solid
     ${(props) =>
       props.primary
-        ? "var(--primary500, #7c8dd8)"
+        ? "var(--red300, #FF5A65)"
         : "var(--secondary200, #343b4f)"};
   border-radius: 8px;
   font-size: 14px;
@@ -214,9 +215,10 @@ export const ExpandButton = styled.button<{ primary?: boolean }>`
   &:hover:not(:disabled) {
     background: ${(props) =>
       props.primary
-        ? "var(--primary600, #6b7bc7)"
+        ? "#FF6B7F"
         : "var(--secondary200, #343b4f)"};
-    border-color: var(--primary500, #7c8dd8);
+    border-color: ${(props) =>
+      props.primary ? "var(--red300, #FF5A65)" : "var(--secondary200, #343b4f)"};
   }
 
   &:disabled {
