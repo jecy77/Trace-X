@@ -542,39 +542,159 @@ export default function AdhocPage() {
 
         {/* 테스트 주소 예시 */}
         <S.TestAddressHint>
-          <span style={{ color: "#9ca3af" }}>테스트 주소:</span>
-          <button
-            onClick={() => {
-              setAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
-              setAnalysisMode("address");
-            }}
+          <div
             style={{
-              background: "none",
-              border: "none",
-              color: "#60a5fa",
-              cursor: "pointer",
-              textDecoration: "underline",
-              fontSize: "13px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "12px",
+              width: "100%",
             }}
           >
-            Vitalik Buterin
-          </button>
-          <button
-            onClick={() => {
-              setAddress("0x28C6c06298d514Db089934071355E5743bf21d60");
-              setAnalysisMode("address");
-            }}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#60a5fa",
-              cursor: "pointer",
-              textDecoration: "underline",
-              fontSize: "13px",
-            }}
-          >
-            Binance Hot Wallet
-          </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <span style={{ color: "#9ca3af", fontWeight: 600 }}>
+                테스트 주소:
+              </span>
+              <button
+                onClick={() => {
+                  setAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+                  setAnalysisMode("address");
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#60a5fa",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontSize: "13px",
+                }}
+              >
+                Vitalik Buterin
+              </button>
+              <button
+                onClick={() => {
+                  setAddress("0x28C6c06298d514Db089934071355E5743bf21d60");
+                  setAnalysisMode("address");
+                }}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#60a5fa",
+                  cursor: "pointer",
+                  textDecoration: "underline",
+                  fontSize: "13px",
+                }}
+              >
+                Binance Hot Wallet
+              </button>
+            </div>
+
+            {/* 룰 테스트용 주소 */}
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "8px",
+                padding: "12px",
+                background: "rgba(59, 130, 246, 0.1)",
+                borderRadius: "8px",
+                border: "1px solid rgba(59, 130, 246, 0.2)",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  color: "#93c5fd",
+                  marginBottom: "4px",
+                }}
+              >
+                룰 테스트용 주소:
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px",
+                  fontSize: "12px",
+                }}
+              >
+                <span style={{ color: "#9ca3af" }}>믹서:</span>
+                <button
+                  onClick={() => {
+                    setAddress("0x8589427373D6D84E98730D7795D8f6f8731FDA16");
+                    setAnalysisMode("address");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#60a5fa",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    fontSize: "12px",
+                  }}
+                >
+                  Tornado Cash
+                </button>
+                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
+                  브릿지:
+                </span>
+                <button
+                  onClick={() => {
+                    setAddress("0x3666f603Cc164936C1b87e207F36BEBa4AC5f18a");
+                    setAnalysisMode("address");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#60a5fa",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    fontSize: "12px",
+                  }}
+                >
+                  Hop Protocol
+                </button>
+                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
+                  CEX:
+                </span>
+                <button
+                  onClick={() => {
+                    setAddress("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE");
+                    setAnalysisMode("address");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#60a5fa",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    fontSize: "12px",
+                  }}
+                >
+                  Binance
+                </button>
+                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
+                  DEX:
+                </span>
+                <button
+                  onClick={() => {
+                    setAddress("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
+                    setAnalysisMode("address");
+                  }}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "#60a5fa",
+                    cursor: "pointer",
+                    textDecoration: "underline",
+                    fontSize: "12px",
+                  }}
+                >
+                  Uniswap V2
+                </button>
+              </div>
+            </div>
+          </div>
         </S.TestAddressHint>
       </S.SearchSection>
 
