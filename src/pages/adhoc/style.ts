@@ -47,9 +47,7 @@ export const ModeSelector = styled.div`
 export const ModeButton = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   background: ${(props) =>
-    props.$active
-      ? "var(--red300, #FF5A65)"
-      : "var(--neutral800, #060a1d)"};
+    props.$active ? "var(--red300, #FF5A65)" : "var(--neutral800, #060a1d)"};
   color: var(--white, #fff);
   border: 1px solid
     ${(props) =>
@@ -65,11 +63,11 @@ export const ModeButton = styled.button<{ $active: boolean }>`
 
   &:hover {
     background: ${(props) =>
-      props.$active
-        ? "#FF6B7F"
-        : "var(--secondary200, #343b4f)"};
+      props.$active ? "#FF6B7F" : "var(--secondary200, #343b4f)"};
     border-color: ${(props) =>
-      props.$active ? "var(--red300, #FF5A65)" : "var(--secondary200, #343b4f)"};
+      props.$active
+        ? "var(--red300, #FF5A65)"
+        : "var(--secondary200, #343b4f)"};
   }
 `;
 
@@ -192,9 +190,7 @@ export const ExpandButton = styled.button<{ primary?: boolean }>`
   position: relative;
   padding: 10px 24px;
   background: ${(props) =>
-    props.primary
-      ? "var(--red300, #FF5A65)"
-      : "var(--neutral800, #060a1d)"};
+    props.primary ? "var(--red300, #FF5A65)" : "var(--neutral800, #060a1d)"};
   color: var(--white, #fff);
   border: 1px solid
     ${(props) =>
@@ -214,11 +210,11 @@ export const ExpandButton = styled.button<{ primary?: boolean }>`
 
   &:hover:not(:disabled) {
     background: ${(props) =>
-      props.primary
-        ? "#FF6B7F"
-        : "var(--secondary200, #343b4f)"};
+      props.primary ? "#FF6B7F" : "var(--secondary200, #343b4f)"};
     border-color: ${(props) =>
-      props.primary ? "var(--red300, #FF5A65)" : "var(--secondary200, #343b4f)"};
+      props.primary
+        ? "var(--red300, #FF5A65)"
+        : "var(--secondary200, #343b4f)"};
   }
 
   &:disabled {
@@ -238,7 +234,7 @@ export const ButtonHint = styled.span`
 export const DetailsSidebar = styled.div`
   width: 400px;
   min-width: 400px;
-  max-height: 75vh;
+  height: 550px; /* 홈 페이지 MainContainer와 동일한 높이 */
   overflow-y: auto;
   background: var(--neutral800, #060a1d);
   border: 1px solid var(--secondary200, #343b4f);

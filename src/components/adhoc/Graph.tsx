@@ -406,12 +406,12 @@ export function Graph({
     <div
       style={{
         width: "100%",
-        height: "55vh", // 버튼 영역 확보
+        height: "550px", // 홈 페이지 MainContainer와 동일한 높이
         marginTop: 20,
-        border: "2px solid rgba(59, 130, 246, 0.4)",
-        borderRadius: "16px",
+        border: "1px solid var(--secondary200, #343b4f)",
+        borderRadius: "8px",
         overflow: "hidden",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+        background: "var(--neutral800, #060a1d)",
       }}
     >
       <ReactFlow
@@ -428,7 +428,7 @@ export function Graph({
         proOptions={{ hideAttribution: true }}
         onNodeClick={handleNodeClick}
         style={{
-          background: "linear-gradient(135deg, #0a0f1e 0%, #0f1729 100%)",
+          background: "var(--neutral800, #060a1d)",
         }}
       >
         {/* 줌/이동 컨트롤 */}
