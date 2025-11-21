@@ -42,14 +42,14 @@ export const ModeSelector = styled.div`
   gap: 12px;
 `;
 
-export const ModeButton = styled.button<{ active: boolean }>`
+export const ModeButton = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   background: ${(props) =>
-    props.active
+    props.$active
       ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
       : "#1f2937"};
   color: white;
-  border: 2px solid ${(props) => (props.active ? "#3b82f6" : "#374151")};
+  border: 2px solid ${(props) => (props.$active ? "#3b82f6" : "#374151")};
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -58,7 +58,7 @@ export const ModeButton = styled.button<{ active: boolean }>`
 
   &:hover {
     background: ${(props) =>
-      props.active
+      props.$active
         ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
         : "#374151"};
     border-color: #3b82f6;

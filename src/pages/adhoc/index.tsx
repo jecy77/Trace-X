@@ -313,13 +313,13 @@ export default function AdhocPage() {
         {/* 분석 모드 선택 */}
         <S.ModeSelector>
           <S.ModeButton
-            active={analysisMode === "address"}
+            $active={analysisMode === "address"}
             onClick={() => setAnalysisMode("address")}
           >
             주소 분석
           </S.ModeButton>
           <S.ModeButton
-            active={analysisMode === "transaction"}
+            $active={analysisMode === "transaction"}
             onClick={() => setAnalysisMode("transaction")}
           >
             트랜잭션 분석
