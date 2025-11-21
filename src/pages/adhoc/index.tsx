@@ -42,6 +42,7 @@ export default function AdhocPage() {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [nodeDetails, setNodeDetails] =
     useState<AddressAnalysisResponse | null>(null);
+  const [isDeepAnalysis, setIsDeepAnalysis] = useState(false); // 심층분석 여부
 
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
@@ -161,20 +162,24 @@ export default function AdhocPage() {
       // 같은 노드 다시 클릭하면 닫기
       setSelectedNode(null);
       setNodeDetails(null);
+      setIsDeepAnalysis(false); // 심층분석 상태도 리셋
       return;
     }
 
     setSelectedNode(nodeAddress);
     setLoadingDetails(true);
     setNodeDetails(null);
+    setIsDeepAnalysis(false); // 새 노드 선택 시 기본 분석으로 리셋
 
     try {
       // 해당 노드의 리스크 스코어링 요청
+      // 기본: 1-hop, basic 분석
+      // 심층분석: 3-hop, advanced 분석
       const result = await analyzeAddressViaBackend({
         address: nodeAddress,
         chain_id: chainId,
-        max_hops: 1,
-        analysis_type: "basic",
+        max_hops: isDeepAnalysis ? 3 : 1,
+        analysis_type: isDeepAnalysis ? "advanced" : "basic",
       });
 
       setNodeDetails(result);
@@ -303,9 +308,36 @@ export default function AdhocPage() {
           (edge: GraphEdgeData | null): edge is GraphEdgeData => edge !== null
         );
 
+      // 기존 노드들에서 타겟 노드 업데이트
+      // 1. 기존 타겟 노드를 일반 노드로 변경
+      // 2. 확장된 노드를 새로운 타겟으로 설정
+      const updatedNodes = graphData.nodes.map((node) => {
+        const nodeAddrLower = node.address.toLowerCase();
+
+        // 기존 타겟 노드는 일반 노드로 변경
+        if (node.isTarget) {
+          return {
+            ...node,
+            isTarget: false,
+            canExpand: true, // 이제 확장 가능
+          };
+        }
+
+        // 확장된 노드를 새로운 타겟으로 설정
+        if (nodeAddrLower === nodeAddressLower) {
+          return {
+            ...node,
+            isTarget: true,
+            canExpand: false, // 타겟은 확장 불가
+          };
+        }
+
+        return node;
+      });
+
       // 기존 그래프 데이터에 새로운 노드와 엣지 병합
       const mergedGraphData: GraphData = {
-        nodes: [...graphData.nodes, ...newNodes],
+        nodes: [...updatedNodes, ...newNodes],
         edges: [...graphData.edges, ...newEdges],
       };
 
@@ -313,6 +345,9 @@ export default function AdhocPage() {
 
       // 확장된 노드로 표시
       setExpandedNodes((prev) => new Set(prev).add(nodeAddressLower));
+
+      // 타겟 주소 업데이트 (선택적 - UI 표시용)
+      setAddress(nodeAddress);
 
       // 사이드바는 유지 (닫지 않음)
     } catch (err) {
@@ -671,17 +706,86 @@ export default function AdhocPage() {
                     </S.DetailSection>
                   )}
 
-                  {/* 확장 버튼 (타겟 주소가 아닌 경우에만 표시, 맨 아래) */}
-                  {selectedNode &&
-                    selectedNode.toLowerCase() !==
-                      address.trim().toLowerCase() && (
-                      <div
+                  {/* 버튼 영역 (맨 아래) */}
+                  <div
+                    style={{
+                      marginTop: "24px",
+                      paddingTop: "24px",
+                      borderTop: "1px solid var(--secondary200, #343b4f)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px",
+                    }}
+                  >
+                    {/* 심층분석 버튼 */}
+                    {!isDeepAnalysis && (
+                      <button
+                        onClick={async () => {
+                          if (!selectedNode) return;
+                          setIsDeepAnalysis(true);
+                          setLoadingDetails(true);
+                          setNodeDetails(null);
+
+                          try {
+                            const result = await analyzeAddressViaBackend({
+                              address: selectedNode,
+                              chain_id: chainId,
+                              max_hops: 3,
+                              analysis_type: "advanced",
+                            });
+                            setNodeDetails(result);
+                          } catch (err) {
+                            setError(
+                              err instanceof Error
+                                ? err.message
+                                : "심층분석 중 오류가 발생했습니다."
+                            );
+                            setIsDeepAnalysis(false);
+                          } finally {
+                            setLoadingDetails(false);
+                          }
+                        }}
+                        disabled={loadingDetails}
                         style={{
-                          marginTop: "24px",
-                          paddingTop: "24px",
-                          borderTop: "1px solid var(--secondary200, #343b4f)",
+                          width: "100%",
+                          padding: "10px 16px",
+                          background: "var(--red300, #ff5a65)",
+                          color: "var(--white, #fff)",
+                          border: "1px solid var(--red300, #ff5a65)",
+                          borderRadius: "8px",
+                          fontSize: "13px",
+                          fontWeight: 600,
+                          cursor: loadingDetails ? "not-allowed" : "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px",
+                          transition: "all 0.2s ease",
+                          opacity: loadingDetails ? 0.5 : 1,
+                          fontFamily: "Mona Sans",
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!loadingDetails) {
+                            e.currentTarget.style.background = "#ff6b7f";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background =
+                            "var(--red300, #ff5a65)";
                         }}
                       >
+                        <span>
+                          {loadingDetails
+                            ? "심층분석 중..."
+                            : "심층분석 (3-hop, Advanced)"}
+                        </span>
+                      </button>
+                    )}
+
+                    {/* 확장 버튼 (타겟 주소가 아닌 경우에만 표시) */}
+                    {selectedNode &&
+                      selectedNode.toLowerCase() !==
+                        address.trim().toLowerCase() && (
                         <button
                           onClick={() => handleExpandNodeAsTarget(selectedNode)}
                           disabled={loading}
@@ -709,7 +813,8 @@ export default function AdhocPage() {
                                 "var(--secondary200, #343b4f)";
                               e.currentTarget.style.borderColor =
                                 "var(--primary500, #7c8dd8)";
-                              e.currentTarget.style.color = "var(--white, #fff)";
+                              e.currentTarget.style.color =
+                                "var(--white, #fff)";
                             }
                           }}
                           onMouseLeave={(e) => {
@@ -724,8 +829,8 @@ export default function AdhocPage() {
                           <span style={{ fontSize: "14px" }}>→</span>
                           <span>{loading ? "확장 중..." : "이 노드 확장"}</span>
                         </button>
-                      </div>
-                    )}
+                      )}
+                  </div>
                 </>
               ) : (
                 <S.ErrorMessage>
