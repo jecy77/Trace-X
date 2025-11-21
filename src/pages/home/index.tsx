@@ -25,7 +25,13 @@ type LayoutContext = {
 export default function HomePage() {
   const { title, intro } = useOutletContext<LayoutContext>();
 
-  // 🔥 대시보드 상태
+  const shorten = (value: string, left = 6, right = 4) => {
+    if (!value) return "";
+    if (value.length <= left + right) return value;
+    return `${value.slice(0, left)}...${value.slice(-right)}`;
+  };
+
+  // 대시보드 상태
   const [summary, setSummary] = useState<any>(null);
 
   // 모니터링 테이블 상태
@@ -232,7 +238,8 @@ export default function HomePage() {
               <tbody>
                 {monitoring.map((item, idx) => (
                   <S.TableRow key={item.txHash + idx}>
-                    <td>{item.txHash}</td>
+                    <td title={item.txHash}>{shorten(item.txHash)}</td>
+
                     <td>{item.timestamp}</td>
                     <td>{item.value}</td>
                   </S.TableRow>
