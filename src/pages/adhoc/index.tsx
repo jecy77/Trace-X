@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { useOutletContext } from "react-router";
 import * as S from "./style";
 import SearchBar from "@/components/SearchBar";
 import Graph, { GraphData, GraphNodeData } from "@/components/adhoc/Graph";
@@ -17,14 +16,11 @@ const CHAINS = [
   { id: 137, name: "Polygon" },
 ];
 
-// 레이아웃 컨텍스트 타입
-type LayoutContext = {
-  title: string;
-  intro: string;
-};
-
 export default function AdhocPage() {
-  const { title, intro } = useOutletContext<LayoutContext>();
+  // 페이지 정보 (직접 정의)
+  const title = "수동 탐지";
+  const intro = "주소 또는 트랜잭션을 분석하여 위험도를 평가합니다.";
+
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState(1);
   const [analysisMode, setAnalysisMode] = useState<"address" | "transaction">(
