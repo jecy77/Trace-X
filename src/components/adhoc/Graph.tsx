@@ -406,7 +406,7 @@ export function Graph({
     <div
       style={{
         width: "100%",
-        height: "550px", // 홈 페이지 MainContainer와 동일한 높이
+        height: "700px", // 그래프 창 높이 증가
         marginTop: 20,
         border: "1px solid var(--secondary200, #343b4f)",
         borderRadius: "8px",

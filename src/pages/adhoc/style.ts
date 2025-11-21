@@ -234,7 +234,7 @@ export const ButtonHint = styled.span`
 export const DetailsSidebar = styled.div`
   width: 400px;
   min-width: 400px;
-  height: 550px; /* 홈 페이지 MainContainer와 동일한 높이 */
+  height: 700px; /* 그래프와 동일한 높이 */
   overflow-y: auto;
   background: var(--neutral800, #060a1d);
   border: 1px solid var(--secondary200, #343b4f);
