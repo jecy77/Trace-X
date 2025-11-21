@@ -382,14 +382,19 @@ export function Graph({
           displayAsset = displayAsset.slice(0, 8) + "..";
         }
 
-        // 라벨 구성 (간결하게)
+        // 라벨 구성 (자산, 금액, 시간 포함)
         let edgeLabel = "";
 
-        // 금액만 표시 (타임스탬프는 너무 길어서 제외)
+        // 자산과 금액
         if (displayAmount && displayAmount !== "0") {
           edgeLabel = `${displayAsset} ${displayAmount}`;
         } else {
           edgeLabel = displayAsset;
+        }
+
+        // 시간 정보 추가 (간결하게)
+        if (displayTimestamp) {
+          edgeLabel = `${edgeLabel}\n${displayTimestamp}`;
         }
 
         return {

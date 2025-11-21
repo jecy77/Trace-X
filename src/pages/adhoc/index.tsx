@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import * as S from "./style";
 import SearchBar from "@/components/SearchBar";
 import Graph, {
@@ -134,10 +134,32 @@ export default function AdhocPage() {
   const [nodeDetails, setNodeDetails] =
     useState<AddressAnalysisResponse | null>(null);
   const [isDeepAnalysis, setIsDeepAnalysis] = useState(false); // 심층분석 여부
+  const [showTestAddresses, setShowTestAddresses] = useState(false); // 테스트 주소 드롭다운 표시 여부
+  const testAddressesRef = useRef<HTMLDivElement>(null); // 테스트 주소 드롭다운 ref
 
   const [loading, setLoading] = useState(false);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // 외부 클릭 시 드롭다운 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        testAddressesRef.current &&
+        !testAddressesRef.current.contains(event.target as Node)
+      ) {
+        setShowTestAddresses(false);
+      }
+    };
+
+    if (showTestAddresses) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showTestAddresses]);
 
   // 체인 이름 가져오기
   const getChainName = (chainId: number): string => {
@@ -649,162 +671,296 @@ export default function AdhocPage() {
           </S.AnalyzeButton>
         </div>
 
-        {/* 테스트 주소 예시 */}
-        <S.TestAddressHint>
-          <div
+        {/* 테스트 주소 버튼 및 드롭다운 */}
+        <div
+          ref={testAddressesRef}
+          style={{ position: "relative", display: "inline-block" }}
+        >
+          <button
+            onClick={() => setShowTestAddresses(!showTestAddresses)}
             style={{
+              background: "rgba(59, 130, 246, 0.1)",
+              border: "1px solid rgba(59, 130, 246, 0.3)",
+              borderRadius: "6px",
+              padding: "6px 12px",
+              color: "#93c5fd",
+              cursor: "pointer",
+              fontSize: "12px",
+              fontWeight: 500,
               display: "flex",
-              flexDirection: "column",
-              gap: "12px",
-              width: "100%",
+              alignItems: "center",
+              gap: "6px",
+              transition: "all 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "rgba(59, 130, 246, 0.2)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(59, 130, 246, 0.1)";
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <span style={{ color: "#9ca3af", fontWeight: 600 }}>
-                테스트 주소:
-              </span>
-              <button
-                onClick={() => {
-                  setAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
-                  setAnalysisMode("address");
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#60a5fa",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  fontSize: "13px",
-                }}
-              >
-                Vitalik Buterin
-              </button>
-              <button
-                onClick={() => {
-                  setAddress("0x28C6c06298d514Db089934071355E5743bf21d60");
-                  setAnalysisMode("address");
-                }}
-                style={{
-                  background: "none",
-                  border: "none",
-                  color: "#60a5fa",
-                  cursor: "pointer",
-                  textDecoration: "underline",
-                  fontSize: "13px",
-                }}
-              >
-                Binance Hot Wallet
-              </button>
-            </div>
+            테스트 주소
+            <span style={{ fontSize: "10px" }}>
+              {showTestAddresses ? "▲" : "▼"}
+            </span>
+          </button>
 
-            {/* 룰 테스트용 주소 */}
+          {/* 드롭다운 메뉴 */}
+          {showTestAddresses && (
             <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "8px",
-                padding: "12px",
-                background: "rgba(59, 130, 246, 0.1)",
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                marginTop: "8px",
+                background: "rgba(30, 41, 59, 0.95)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
                 borderRadius: "8px",
-                border: "1px solid rgba(59, 130, 246, 0.2)",
+                padding: "12px",
+                minWidth: "300px",
+                zIndex: 1000,
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
               }}
             >
-              <div
-                style={{
-                  fontSize: "12px",
-                  fontWeight: 600,
-                  color: "#93c5fd",
-                  marginBottom: "4px",
-                }}
-              >
-                룰 테스트용 주소:
+              {/* 기본 테스트 주소 */}
+              <div style={{ marginBottom: "12px" }}>
+                <div
+                  style={{
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: "#94a3b8",
+                    marginBottom: "8px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  기본 테스트 주소
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "6px",
+                  }}
+                >
+                  <button
+                    onClick={() => {
+                      setAddress("0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
+                      setAnalysisMode("address");
+                      setShowTestAddresses(false);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#60a5fa",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "rgba(59, 130, 246, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "none";
+                    }}
+                  >
+                    Vitalik Buterin
+                  </button>
+                  <button
+                    onClick={() => {
+                      setAddress("0x28C6c06298d514Db089934071355E5743bf21d60");
+                      setAnalysisMode("address");
+                      setShowTestAddresses(false);
+                    }}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      color: "#60a5fa",
+                      cursor: "pointer",
+                      textAlign: "left",
+                      padding: "4px 8px",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background =
+                        "rgba(59, 130, 246, 0.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "none";
+                    }}
+                  >
+                    Binance Hot Wallet
+                  </button>
+                </div>
               </div>
+
+              {/* 룰 테스트용 주소 */}
               <div
                 style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: "8px",
-                  fontSize: "12px",
+                  borderTop: "1px solid rgba(59, 130, 246, 0.2)",
+                  paddingTop: "12px",
                 }}
               >
-                <span style={{ color: "#9ca3af" }}>믹서:</span>
-                <button
-                  onClick={() => {
-                    setAddress("0x8589427373D6D84E98730D7795D8f6f8731FDA16");
-                    setAnalysisMode("address");
-                  }}
+                <div
                   style={{
-                    background: "none",
-                    border: "none",
-                    color: "#60a5fa",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "12px",
+                    fontSize: "11px",
+                    fontWeight: 600,
+                    color: "#94a3b8",
+                    marginBottom: "8px",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
                   }}
                 >
-                  Tornado Cash
-                </button>
-                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
-                  브릿지:
-                </span>
-                <button
-                  onClick={() => {
-                    setAddress("0x3666f603Cc164936C1b87e207F36BEBa4AC5f18a");
-                    setAnalysisMode("address");
-                  }}
+                  룰 테스트용 주소
+                </div>
+                <div
                   style={{
-                    background: "none",
-                    border: "none",
-                    color: "#60a5fa",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "12px",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "8px",
                   }}
                 >
-                  Hop Protocol
-                </button>
-                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
-                  CEX:
-                </span>
-                <button
-                  onClick={() => {
-                    setAddress("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE");
-                    setAnalysisMode("address");
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#60a5fa",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "12px",
-                  }}
-                >
-                  Binance
-                </button>
-                <span style={{ color: "#9ca3af", marginLeft: "8px" }}>
-                  DEX:
-                </span>
-                <button
-                  onClick={() => {
-                    setAddress("0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D");
-                    setAnalysisMode("address");
-                  }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#60a5fa",
-                    cursor: "pointer",
-                    textDecoration: "underline",
-                    fontSize: "12px",
-                  }}
-                >
-                  Uniswap V2
-                </button>
+                  <div>
+                    <span style={{ color: "#9ca3af", fontSize: "11px" }}>
+                      믹서:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setAddress(
+                          "0x8589427373D6D84E98730D7795D8f6f8731FDA16"
+                        );
+                        setAnalysisMode("address");
+                        setShowTestAddresses(false);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#60a5fa",
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background =
+                          "rgba(59, 130, 246, 0.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "none";
+                      }}
+                    >
+                      Tornado Cash
+                    </button>
+                  </div>
+                  <div>
+                    <span style={{ color: "#9ca3af", fontSize: "11px" }}>
+                      브릿지:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setAddress(
+                          "0x3666f603Cc164936C1b87e207F36BEBa4AC5f18a"
+                        );
+                        setAnalysisMode("address");
+                        setShowTestAddresses(false);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#60a5fa",
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background =
+                          "rgba(59, 130, 246, 0.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "none";
+                      }}
+                    >
+                      Hop Protocol
+                    </button>
+                  </div>
+                  <div>
+                    <span style={{ color: "#9ca3af", fontSize: "11px" }}>
+                      CEX:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setAddress(
+                          "0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"
+                        );
+                        setAnalysisMode("address");
+                        setShowTestAddresses(false);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#60a5fa",
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background =
+                          "rgba(59, 130, 246, 0.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "none";
+                      }}
+                    >
+                      Binance
+                    </button>
+                  </div>
+                  <div>
+                    <span style={{ color: "#9ca3af", fontSize: "11px" }}>
+                      DEX:
+                    </span>
+                    <button
+                      onClick={() => {
+                        setAddress(
+                          "0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D"
+                        );
+                        setAnalysisMode("address");
+                        setShowTestAddresses(false);
+                      }}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#60a5fa",
+                        cursor: "pointer",
+                        marginLeft: "8px",
+                        padding: "4px 8px",
+                        borderRadius: "4px",
+                        fontSize: "12px",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background =
+                          "rgba(59, 130, 246, 0.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = "none";
+                      }}
+                    >
+                      Uniswap V2
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </S.TestAddressHint>
+          )}
+        </div>
       </S.SearchSection>
 
       {/* 에러 메시지 */}
@@ -1005,6 +1161,67 @@ export default function AdhocPage() {
                         </S.RuleList>
                       </S.DetailSection>
                     )}
+
+                  {/* 거래 시간 정보 */}
+                  {(() => {
+                    // 해당 노드와 연결된 엣지의 시간 정보 찾기
+                    const nodeEdges =
+                      graphData?.edges.filter(
+                        (edge) =>
+                          edge.source.toLowerCase() ===
+                            selectedNode?.toLowerCase() ||
+                          edge.target.toLowerCase() ===
+                            selectedNode?.toLowerCase()
+                      ) || [];
+
+                    if (nodeEdges.length > 0) {
+                      // 가장 최근 거래 시간 찾기
+                      const timestamps = nodeEdges
+                        .map((edge) => edge.timestamp)
+                        .filter((ts) => ts)
+                        .sort()
+                        .reverse();
+
+                      if (timestamps.length > 0) {
+                        const latestTimestamp = timestamps[0];
+                        if (latestTimestamp) {
+                          try {
+                            const date = new Date(latestTimestamp);
+                            if (!isNaN(date.getTime())) {
+                              const formattedDate = date.toLocaleString(
+                                "ko-KR",
+                                {
+                                  year: "numeric",
+                                  month: "2-digit",
+                                  day: "2-digit",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                }
+                              );
+
+                              return (
+                                <S.DetailSection>
+                                  <S.DetailLabel>최근 거래 시간</S.DetailLabel>
+                                  <S.DetailValue
+                                    style={{
+                                      fontSize: "13px",
+                                      color: "#9ca3af",
+                                    }}
+                                  >
+                                    {formattedDate}
+                                  </S.DetailValue>
+                                </S.DetailSection>
+                              );
+                            }
+                          } catch {
+                            // 날짜 파싱 실패 시 무시
+                          }
+                        }
+                      }
+                    }
+                    return null;
+                  })()}
 
                   {/* 설명 */}
                   {nodeDetails.explanation && (
