@@ -1,7 +1,8 @@
 import styled from "styled-components";
 
 export const Container = styled.div`
-  width: 500px; // 중앙 검색바 적당한 폭
+  flex: 1; // 부모 컨테이너에 맞춰서 확장
+  width: 100%; // 전체 너비 사용
 `;
 
 export const InputWrapper = styled.div`
@@ -12,7 +13,12 @@ export const InputWrapper = styled.div`
   border-radius: 12px;
   padding: 6px;
   gap: 6px;
-  /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35); */
+  transition: border-color 0.2s ease;
+
+  &:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+  }
 `;
 
 export const Input = styled.input`
@@ -24,10 +30,13 @@ export const Input = styled.input`
   outline: none;
   color: #e5e7eb;
   font-size: 14px;
-  font-family: Pretendard;
+  font-family: monospace, Pretendard; // 주소/해시를 위한 monospace 폰트
+  letter-spacing: 0.3px;
+  width: 100%; // 전체 너비 사용
 
   &::placeholder {
     color: #6b7280;
+    font-family: Pretendard; // placeholder는 일반 폰트
   }
 `;
 

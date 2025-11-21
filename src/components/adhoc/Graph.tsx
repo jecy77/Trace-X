@@ -1,300 +1,465 @@
-import { useMemo } from "react";
-import ReactFlow, { Handle, MarkerType, Position, Node, Edge } from "reactflow";
+import { useMemo, useEffect, useRef } from "react";
+import ReactFlow, {
+  Handle,
+  MarkerType,
+  Position,
+  Node,
+  Edge,
+  Controls,
+  Background,
+  MiniMap,
+  useReactFlow,
+} from "reactflow";
 import "reactflow/dist/style.css";
 import dagre from "dagre";
 
-/* =========================================================
-   타입 정의
-========================================================= */
-
-export type BackendNode = {
-  id: string;
+// ====== 타입 정의 ======
+export type GraphNodeData = {
   address: string;
-  label?: string;
-  isContract?: boolean;
-  chain_id?: number;
-  risk?: any;
+  label: string;
+  chain: string;
+  type: string;
+  isWarning: boolean;
+  isTarget: boolean; // 타겟 주소 여부
 };
 
-export type BackendEdge = {
-  from_address: string;
-  to_address: string;
+export type GraphEdgeData = {
+  source: string;
+  target: string;
+  type: string;
+  asset: string;
   amount: string;
-  timestamp?: number | string;
-  token_symbol?: string;
-  tx_type?: string;
+  timestamp?: string;
 };
 
 export type GraphData = {
-  nodes: BackendNode[];
-  edges: BackendEdge[];
+  nodes: GraphNodeData[];
+  edges: GraphEdgeData[];
 };
 
-/* =========================================================
-   더미 데이터 (fallback)
-========================================================= */
-
-const fallbackDummy: GraphData = {
-  nodes: [
-    { id: "root", address: "0xROOT", label: "Root EOA", isContract: false },
-    { id: "bridgeA", address: "0xBRIDGE_A", label: "LayerZero Bridge" },
-    { id: "bridgeB", address: "0xBRIDGE_B", label: "Polygon Bridge" },
-    { id: "child1", address: "0xC1", label: "EOA User C1" },
-    {
-      id: "child2",
-      address: "0xC2",
-      label: "Smart Contract C2",
-      isContract: true,
-    },
-    { id: "child3", address: "0xC3", label: "EOA Wallet C3" },
-    { id: "child4", address: "0xC4", label: "EOA Wallet C4" },
-    {
-      id: "child5",
-      address: "0xC5",
-      label: "Contract Worker C5",
-      isContract: true,
-    },
-  ],
-
-  edges: [
-    {
-      from_address: "0xROOT",
-      to_address: "0xBRIDGE_A",
-      amount: "1400",
-      timestamp: 1761821111,
-      token_symbol: "USDT",
-      tx_type: "bridge_transfer",
-    },
-    {
-      from_address: "0xROOT",
-      to_address: "0xBRIDGE_B",
-      amount: "900",
-      timestamp: 1761822222,
-      token_symbol: "USDC",
-      tx_type: "layerzero_bridge",
-    },
-    {
-      from_address: "0xBRIDGE_A",
-      to_address: "0xC1",
-      amount: "700",
-      timestamp: 1761823333,
-      token_symbol: "ETH",
-      tx_type: "erc20_transfer",
-    },
-    {
-      from_address: "0xC1",
-      to_address: "0xC2",
-      amount: "350",
-      timestamp: 1761824444,
-      token_symbol: "ETH",
-      tx_type: "contract_call",
-    },
-    {
-      from_address: "0xC1",
-      to_address: "0xC3",
-      amount: "200",
-      timestamp: 1761825555,
-      token_symbol: "DAI",
-      tx_type: "erc20_transfer",
-    },
-    {
-      from_address: "0xBRIDGE_B",
-      to_address: "0xC4",
-      amount: "450",
-      timestamp: 1761826666,
-      token_symbol: "MATIC",
-      tx_type: "erc20_transfer",
-    },
-    {
-      from_address: "0xC4",
-      to_address: "0xC5",
-      amount: "220",
-      timestamp: 1761827777,
-      token_symbol: "USDT",
-      tx_type: "contract_call",
-    },
-  ],
+// ====== Custom Node ======
+type CustomNodeProps = {
+  data: GraphNodeData;
 };
 
-/* =========================================================
-   브릿지 감지
-========================================================= */
+const CustomNode = ({ data }: CustomNodeProps) => {
+  const shortAddress = data.address
+    ? `${data.address.slice(0, 8)}...${data.address.slice(-6)}`
+    : "Unknown";
+  const isHighRisk = data.isWarning;
+  const isTarget = data.isTarget; // 타겟 주소 여부
 
-const isBridgeNode = (node: BackendNode, edges: BackendEdge[]) => {
-  const low = (v?: string) => (v ? v.toLowerCase() : "");
+  // 타겟 주소일 경우 특별한 스타일 적용
+  const borderColor = isTarget
+    ? "#10b981" // 초록색
+    : isHighRisk
+    ? "#ef4444" // 빨간색
+    : "#3b82f6"; // 파란색
 
-  if (low(node.label).includes("bridge")) return true;
-  if (low(node.address).includes("bridge")) return true;
+  const bgGradient = isTarget
+    ? "linear-gradient(135deg, #065f46 0%, #047857 100%)" // 초록 그라디언트
+    : isHighRisk
+    ? "linear-gradient(135deg, #450a0a 0%, #7f1d1d 100%)" // 빨간 그라디언트
+    : "linear-gradient(135deg, #0c4a6e 0%, #075985 100%)"; // 파란 그라디언트
 
-  const connected = edges.filter(
-    (e) => e.from_address === node.address || e.to_address === node.address
-  );
-  return connected.some((e) => low(e.tx_type).includes("bridge"));
-};
+  const boxShadow = isTarget
+    ? "0 6px 24px rgba(16, 185, 129, 0.4)" // 초록 그림자
+    : isHighRisk
+    ? "0 4px 20px rgba(239, 68, 68, 0.3)"
+    : "0 4px 16px rgba(59, 130, 246, 0.3)";
 
-/* =========================================================
-   Custom Node
-========================================================= */
+  const hoverShadow = isTarget
+    ? "0 10px 36px rgba(16, 185, 129, 0.6)" // 초록 그림자
+    : isHighRisk
+    ? "0 8px 30px rgba(239, 68, 68, 0.5)"
+    : "0 8px 24px rgba(59, 130, 246, 0.5)";
 
-const CustomNode = ({ data }: any) => (
-  <div
-    style={{
-      padding: "10px 14px",
-      borderRadius: 8,
-      border: data.isWarning ? "2px solid #ff4d4f" : "1px solid #3a3f58",
-      background: "#0f1629",
-      color: "#fff",
-      fontSize: 12,
-    }}
-  >
-    <Handle type="source" position={Position.Right} />
-    <Handle type="target" position={Position.Left} />
-    <div>{data.address}</div>
-    <div style={{ fontSize: 11, opacity: 0.7 }}>
-      {data.label} · {data.type}
+  return (
+    <div
+      style={{
+        padding: isTarget ? "18px 22px" : "14px 18px", // 타겟은 패딩 증가
+        borderRadius: 12,
+        border: `3px solid ${borderColor}`, // 타겟은 3px 테두리
+        background: bgGradient,
+        color: "#fff",
+        fontSize: isTarget ? 14 : 13, // 타겟은 폰트 크기 증가
+        cursor: "pointer",
+        minWidth: isTarget ? "260px" : "220px", // 타겟은 더 넓게
+        maxWidth: isTarget ? "320px" : "280px",
+        boxShadow: boxShadow,
+        transition: "all 0.3s ease",
+        position: "relative",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-2px) scale(1.02)";
+        e.currentTarget.style.boxShadow = hoverShadow;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow = boxShadow;
+      }}
+    >
+      {/* TARGET 뱃지 (타겟 주소일 경우만 표시) */}
+      {isTarget && (
+        <div
+          style={{
+            position: "absolute",
+            top: "-10px",
+            right: "-10px",
+            background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+            color: "white",
+            padding: "4px 10px",
+            borderRadius: "12px",
+            fontSize: "10px",
+            fontWeight: "800",
+            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.5)",
+            border: "2px solid white",
+            letterSpacing: "0.5px",
+          }}
+        >
+          TARGET
+        </div>
+      )}
+
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          background: isTarget ? "#10b981" : isHighRisk ? "#ef4444" : "#3b82f6",
+          width: isTarget ? 14 : 12, // 타겟은 핸들 크기 증가
+          height: isTarget ? 14 : 12,
+          border: "2px solid white",
+        }}
+      />
+      <Handle
+        type="target"
+        position={Position.Left}
+        style={{
+          background: isTarget ? "#10b981" : isHighRisk ? "#ef4444" : "#3b82f6",
+          width: isTarget ? 14 : 12,
+          height: isTarget ? 14 : 12,
+          border: "2px solid white",
+        }}
+      />
+
+      {/* 주소 */}
+      <div
+        style={{
+          fontWeight: "700",
+          marginBottom: "8px",
+          color: isTarget ? "#d1fae5" : isHighRisk ? "#fca5a5" : "#bfdbfe",
+          fontFamily: "monospace",
+          fontSize: "14px",
+          letterSpacing: "0.5px",
+        }}
+      >
+        {shortAddress}
+      </div>
+
+      {/* 라벨과 체인 */}
+      <div
+        style={{
+          fontSize: 10,
+          opacity: 0.8,
+          color: "#cbd5e1",
+          display: "flex",
+          gap: "6px",
+          flexWrap: "wrap",
+        }}
+      >
+        <span
+          style={{
+            background: "rgba(59, 130, 246, 0.2)",
+            padding: "2px 6px",
+            borderRadius: 4,
+          }}
+        >
+          {data.label}
+        </span>
+        <span
+          style={{
+            fontSize: 10,
+            color: "#94a3b8",
+            fontWeight: 500,
+          }}
+        >
+          {data.chain}
+        </span>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
-/* =========================================================
-   Dagre Layout
-========================================================= */
+// ====== DAGRE Layout ======
+const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
+  const dagreGraph = new dagre.graphlib.Graph();
+  dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const layout = (nodes: Node[], edges: Edge[]) => {
-  const g = new dagre.graphlib.Graph();
-  g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({
-    rankdir: "LR",
-    ranksep: 120,
-    nodesep: 80,
-    edgesep: 30,
+  // 가로 방향 레이아웃 (좌→우) - 중앙 노드 기준으로 펼쳐짐!
+  dagreGraph.setGraph({
+    rankdir: "LR", // Left to Right (좌→우 방향)
+    align: "UL", // 상단 정렬
+    nodesep: 150, // 같은 레벨 노드 간 세로 간격
+    ranksep: 350, // 레벨 간 가로 간격
+    edgesep: 30, // 엣지 간 간격
+    marginx: 100, // 좌우 여백
+    marginy: 80, // 상하 여백
+    ranker: "network-simplex", // 최적화된 레이아웃 알고리즘
   });
 
-  nodes.forEach((n) => g.setNode(n.id, { width: 200, height: 50 }));
-  edges.forEach((e) => g.setEdge(e.source, e.target));
+  nodes.forEach((node) => {
+    // 노드 크기
+    dagreGraph.setNode(node.id, { width: 240, height: 85 });
+  });
 
-  dagre.layout(g);
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
 
-  return {
-    nodes: nodes.map((n) => {
-      const pos = g.node(n.id);
-      return {
-        ...n,
-        position: { x: pos.x, y: pos.y },
-        sourcePosition: Position.Right,
-        targetPosition: Position.Left,
-      };
-    }),
-    edges,
-  };
+  dagre.layout(dagreGraph);
+
+  const layoutedNodes = nodes.map((node) => {
+    const pos = dagreGraph.node(node.id);
+    return {
+      ...node,
+      position: { x: pos.x, y: pos.y },
+      // LR 방향에서는 Left/Right 사용
+      sourcePosition: Position.Right,
+      targetPosition: Position.Left,
+    };
+  });
+
+  return { nodes: layoutedNodes, edges };
 };
 
-/* =========================================================
-   MAIN (백엔드 호출 제거)
-========================================================= */
+// ====== Main Component ======
+export function Graph({
+  data,
+  onNodeClick,
+  fitViewOnMount, // 초기 로드 시에만 fitView
+}: {
+  data: GraphData;
+  onNodeClick?: (address: string) => void;
+  fitViewOnMount: boolean;
+}) {
+  const reactFlowInstance = useReactFlow(); // useReactFlow 훅 사용
+  const hasFitView = useRef(false); // fitView가 실행되었는지 추적
 
-export default function Graph({ data }: { data?: GraphData | null }) {
-  const graph = data && data.nodes?.length ? data : fallbackDummy;
-
-  /* ---------- 노드 ---------- */
-  const nodes = useMemo<Node[]>(() => {
-    return graph.nodes.map((n) => {
-      const bridge = isBridgeNode(n, graph.edges);
-
-      return {
-        id: n.id,
+  // ----- 노드 변환 -----
+  const nodes = useMemo<Node<GraphNodeData>[]>(
+    () =>
+      data.nodes.map((n) => ({
+        id: n.address,
         type: "customNode",
-        data: {
-          address: n.address,
-          label: n.label ?? "Unknown",
-          type: bridge ? "Bridge" : n.isContract ? "Contract" : "EOA",
-          isWarning: bridge,
-        },
-        position: { x: 0, y: 0 },
-      };
-    });
-  }, [graph]);
+        data: n,
+        position: { x: 0, y: 0 }, // 초기 위치는 0,0으로 설정 (dagre가 업데이트할 것)
+      })),
+    [data]
+  );
 
-  /* ---------- 엣지 ---------- */
-  const edges = useMemo<Edge[]>(() => {
-    const formatTS = (ts: any) => {
-      if (!ts) return "";
-      const d = new Date(typeof ts === "number" ? ts * 1000 : ts);
-      return d.toISOString().replace("T", " ").substring(0, 19);
-    };
+  // ----- 엣지 변환 + timestamp 포함 라벨 -----
+  const edges = useMemo<Edge[]>(
+    () =>
+      data.edges.map((e, i) => {
+        // 타임스탬프 포맷팅 (안전하게)
+        let displayTimestamp = "";
+        if (e.timestamp) {
+          try {
+            const date = new Date(e.timestamp);
+            // 유효한 날짜인지 확인
+            if (!isNaN(date.getTime())) {
+              const month = String(date.getMonth() + 1).padStart(2, "0");
+              const day = String(date.getDate()).padStart(2, "0");
+              const hour = String(date.getHours()).padStart(2, "0");
+              const min = String(date.getMinutes()).padStart(2, "0");
+              displayTimestamp = `${month}/${day} ${hour}:${min}`;
+            }
+          } catch {
+            // 날짜 파싱 실패 시 빈 문자열
+            displayTimestamp = "";
+          }
+        }
 
-    return graph.edges.map((e, i) => ({
-      id: `edge-${i}`,
-      source: graph.nodes.find((n) => n.address === e.from_address)?.id ?? "",
-      target: graph.nodes.find((n) => n.address === e.to_address)?.id ?? "",
-      style: { stroke: "#767676", strokeWidth: 2 },
-      markerEnd: { type: MarkerType.Arrow, color: "#767676" },
-      label: `⏱ ${formatTS(e.timestamp)} | ${e.token_symbol ?? ""} · ${
-        e.amount
-      }`,
-      labelStyle: { fill: "#fff", fontSize: 10 },
-      labelBgStyle: { fill: "rgba(89, 89, 89, 0.32)", borderRadius: 4 },
-      labelBgPadding: [6, 4],
-    }));
-  }, [graph]);
+        // 금액 포맷팅 (간결하게)
+        let displayAmount = "";
+        if (e.amount) {
+          const num = Number(e.amount);
+          if (!isNaN(num)) {
+            if (num === 0) {
+              displayAmount = "0";
+            } else if (num < 0.0001 && num !== 0) {
+              displayAmount = num.toExponential(2);
+            } else if (num < 1) {
+              displayAmount = num.toFixed(4);
+            } else if (num < 1000) {
+              displayAmount = num.toFixed(2);
+            } else {
+              displayAmount = num.toLocaleString(undefined, {
+                maximumFractionDigits: 2,
+              });
+            }
+          }
+        }
 
-  const layouted = useMemo(() => layout(nodes, edges), [nodes, edges]);
+        // 자산 이름 간결화
+        let displayAsset = e.asset || "ETH";
+        if (displayAsset.length > 10) {
+          displayAsset = displayAsset.slice(0, 8) + "..";
+        }
 
-  const bridgeNodes = nodes.filter((n) => n.data.type === "Bridge");
+        // 라벨 구성 (간결하게)
+        let edgeLabel = "";
+
+        // 금액만 표시 (타임스탬프는 너무 길어서 제외)
+        if (displayAmount && displayAmount !== "0") {
+          edgeLabel = `${displayAsset} ${displayAmount}`;
+        } else {
+          edgeLabel = displayAsset;
+        }
+
+        return {
+          id: `edge-${i}`,
+          source: e.source,
+          target: e.target,
+          type: "default", // smoothstep → default (더 단순하고 명확)
+          animated: false,
+          style: {
+            stroke: "#60a5fa",
+            strokeWidth: 3, // 엣지 더 굵게
+            strokeOpacity: 0.8,
+          },
+          markerEnd: {
+            type: MarkerType.ArrowClosed,
+            color: "#60a5fa",
+            width: 25,
+            height: 25,
+          },
+          label: edgeLabel,
+          labelStyle: {
+            fill: "#e0f2fe",
+            fontSize: 12,
+            fontWeight: 700,
+          },
+          labelBgStyle: {
+            fill: "rgba(15, 23, 42, 0.98)", // 불투명도 증가
+            color: "#fff",
+            borderRadius: 8,
+            border: "2px solid rgba(96, 165, 250, 0.6)", // 테두리 두껍게
+          },
+          labelBgPadding: [12, 8] as [number, number], // 패딩 증가
+          labelShowBg: true, // 배경 명시적으로 표시
+        };
+      }),
+    [data]
+  );
+
+  // Layout 적용
+  const layouted = useMemo(
+    () => getLayoutedElements(nodes, edges),
+    [nodes, edges]
+  );
+
+  // ----- 타겟 노드로 자동 포커스 (레이아웃 적용 후!) -----
+  useEffect(() => {
+    if (layouted.nodes.length > 0) {
+      // 레이아웃 적용된 노드에서 타겟 노드 찾기
+      const targetNode = layouted.nodes.find((node) => node.data.isTarget);
+
+      setTimeout(() => {
+        if (targetNode && targetNode.position) {
+          // 타겟 노드가 있으면 그 노드 중심으로 포커스
+          reactFlowInstance.setCenter(
+            targetNode.position.x,
+            targetNode.position.y,
+            {
+              zoom: 0.8, // 적당한 줌 레벨
+              duration: 800, // 부드러운 애니메이션 (800ms)
+            }
+          );
+          console.log(
+            "🎯 타겟 노드로 포커스:",
+            targetNode.id,
+            targetNode.position
+          );
+        } else if (fitViewOnMount && !hasFitView.current) {
+          // 타겟 노드가 없으면 (또는 초기 로드인데 타겟이 없으면) 전체 fitView
+          reactFlowInstance.fitView({
+            padding: 0.15,
+            maxZoom: 1.2,
+          });
+          hasFitView.current = true;
+        }
+      }, 200); // 레이아웃 계산 완료 후
+    }
+  }, [layouted, fitViewOnMount, reactFlowInstance]);
+
+  // 클릭하면 부모 컴포넌트로 전달
+  const handleNodeClick = (event: any, node: Node) => {
+    // 부모 컴포넌트의 onNodeClick 호출
+    if (onNodeClick) {
+      onNodeClick(node.id);
+    }
+  };
 
   return (
     <div
       style={{
         width: "100%",
-        height: "85vh",
-        marginTop: 30,
-        position: "relative",
+        height: "55vh", // 버튼 영역 확보
+        marginTop: 20,
+        border: "2px solid rgba(59, 130, 246, 0.4)",
+        borderRadius: "16px",
+        overflow: "hidden",
+        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
       }}
     >
       <ReactFlow
         nodes={layouted.nodes}
         edges={layouted.edges}
         nodeTypes={{ customNode: CustomNode }}
-        fitView
+        fitView={false} // 초기 로드 시에만 fitViewOnMount로 제어
+        fitViewOptions={{
+          padding: 0.15, // 여백 15%
+          maxZoom: 1.2, // 최대 확대 (너무 크게 보이지 않게)
+        }}
+        minZoom={0.1} // 최소 축소
+        maxZoom={1.8} // 최대 확대
         proOptions={{ hideAttribution: true }}
-        style={{ background: "transparent" }}
-      />
-
-      {/* 브릿지 버튼 출력 */}
-      <div
+        onNodeClick={handleNodeClick}
         style={{
-          position: "absolute",
-          right: 20,
-          bottom: 40,
-          display: "flex",
-          flexDirection: "column",
-          gap: "10px",
+          background: "linear-gradient(135deg, #0a0f1e 0%, #0f1729 100%)",
         }}
       >
-        {bridgeNodes.map((b) => (
-          <button
-            key={b.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "10px 14px",
-              borderRadius: "8px",
-              background: "#233157",
-              border: "1px solid #0B1739",
-              color: "#FFFFFF",
-              fontSize: "13px",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
-            onClick={() => console.log("브릿지 탐색:", b.data.address)}
-          >
-            <span style={{ color: "#7e9eff" }}>
-              {b.data.label || b.data.address} 탐색하기
-            </span>
-          </button>
-        ))}
-      </div>
+        {/* 줌/이동 컨트롤 */}
+        <Controls
+          style={{
+            background: "rgba(15, 23, 42, 0.95)",
+            border: "2px solid #3b82f6",
+            borderRadius: "12px",
+            boxShadow: "0 4px 16px rgba(0, 0, 0, 0.5)",
+          }}
+        />
+
+        {/* 배경 그리드 */}
+        <Background
+          color="#1e3a8a"
+          gap={20}
+          size={1}
+          style={{ opacity: 0.3 }}
+        />
+
+        {/* 미니맵 */}
+        <MiniMap
+          nodeColor={(node) => {
+            const nodeData = node.data as GraphNodeData;
+            if (nodeData.isTarget) return "#10b981"; // 타겟 노드는 초록색
+            return nodeData.isWarning ? "#ef4444" : "#3b82f6";
+          }}
+          maskColor="rgba(0, 0, 0, 0.7)"
+        />
+      </ReactFlow>
     </div>
   );
 }
+
+export default Graph;
