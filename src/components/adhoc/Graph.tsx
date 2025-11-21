@@ -164,29 +164,85 @@ const CustomNode = ({ data }: CustomNodeProps) => {
       {/* 라벨과 체인 */}
       <div
         style={{
-          fontSize: 10,
-          opacity: 0.8,
+          fontSize: 11,
           color: "#cbd5e1",
           display: "flex",
-          gap: "6px",
+          gap: "8px",
           flexWrap: "wrap",
           alignItems: "center",
+          marginTop: "4px",
         }}
       >
+        {/* 라벨 배지 (타입별 색상) - 더 눈에 띄게 */}
+        {data.type && data.type !== "unknown" && (
+          <span
+            style={{
+              background:
+                data.type === "dex"
+                  ? "rgba(16, 185, 129, 0.5)"
+                  : data.type === "bridge"
+                  ? "rgba(139, 92, 246, 0.5)"
+                  : data.type === "cex"
+                  ? "rgba(59, 130, 246, 0.5)"
+                  : data.type === "mixer"
+                  ? "rgba(239, 68, 68, 0.5)"
+                  : "rgba(59, 130, 246, 0.3)",
+              color:
+                data.type === "dex"
+                  ? "#10b981"
+                  : data.type === "bridge"
+                  ? "#a78bfa"
+                  : data.type === "cex"
+                  ? "#60a5fa"
+                  : data.type === "mixer"
+                  ? "#f87171"
+                  : "#bfdbfe",
+              padding: "4px 8px",
+              borderRadius: 6,
+              fontWeight: 700,
+              fontSize: 11,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+              border:
+                data.type === "dex"
+                  ? "1px solid rgba(16, 185, 129, 0.6)"
+                  : data.type === "bridge"
+                  ? "1px solid rgba(139, 92, 246, 0.6)"
+                  : data.type === "cex"
+                  ? "1px solid rgba(59, 130, 246, 0.6)"
+                  : data.type === "mixer"
+                  ? "1px solid rgba(239, 68, 68, 0.6)"
+                  : "1px solid rgba(59, 130, 246, 0.4)",
+              boxShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            {data.type}
+          </span>
+        )}
+        {/* 주소 라벨 - 더 눈에 띄게 */}
         <span
           style={{
-            background: "rgba(59, 130, 246, 0.2)",
-            padding: "2px 6px",
-            borderRadius: 4,
+            background: "rgba(59, 130, 246, 0.3)",
+            color: "#bfdbfe",
+            padding: "4px 8px",
+            borderRadius: 6,
+            fontSize: 11,
+            fontWeight: 600,
+            border: "1px solid rgba(59, 130, 246, 0.4)",
+            boxShadow: "0 2px 4px rgba(0, 0, 0, 0.15)",
           }}
         >
           {data.label}
         </span>
+        {/* 체인 정보 */}
         <span
           style={{
             fontSize: 10,
             color: "#94a3b8",
-            fontWeight: 500,
+            fontWeight: 600,
+            padding: "2px 6px",
+            background: "rgba(148, 163, 184, 0.15)",
+            borderRadius: 4,
           }}
         >
           {data.chain}
@@ -194,10 +250,11 @@ const CustomNode = ({ data }: CustomNodeProps) => {
         {canExpand && (
           <span
             style={{
-              fontSize: 14,
+              fontSize: 16,
               color: "#667eea",
               fontWeight: "bold",
               marginLeft: "auto",
+              textShadow: "0 0 4px rgba(102, 126, 234, 0.5)",
             }}
           >
             →

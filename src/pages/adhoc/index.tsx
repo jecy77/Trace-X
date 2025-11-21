@@ -20,6 +20,97 @@ const CHAINS = [
   { id: 137, name: "Polygon" },
 ];
 
+// 주소 라벨링 데이터
+const ADDRESS_LABELS: Record<
+  string,
+  { name: string; type: string; description: string }
+> = {
+  // DEX
+  "0x7a250d5630b4cf539739df2c5dacb4c659f2488d": {
+    name: "Uniswap V2 Router",
+    type: "DEX",
+    description:
+      "Uniswap V2의 라우터 컨트랙트로, 토큰 스왑을 위한 DEX 프로토콜입니다.",
+  },
+  "0xe592427a0aece92de3edee1f18e0157c05861564": {
+    name: "Uniswap V3 Router",
+    type: "DEX",
+    description:
+      "Uniswap V3의 라우터 컨트랙트로, 집중 유동성 풀을 사용하는 DEX 프로토콜입니다.",
+  },
+  // 브릿지
+  "0x3666f603cc164936c1b87e207f36beba4ac5f18a": {
+    name: "Hop Protocol",
+    type: "Bridge",
+    description:
+      "Hop Protocol은 크로스체인 자산 전송을 위한 브릿지 프로토콜입니다.",
+  },
+  "0x6b7a87899490ece95443e979ca9485cbe7e71522": {
+    name: "Multichain (Anyswap)",
+    type: "Bridge",
+    description:
+      "Multichain은 크로스체인 브릿지 서비스로, 여러 체인 간 자산 전송을 지원합니다.",
+  },
+  "0x8731d54e9d02c286767d56ac03e8037c07e01e98": {
+    name: "Stargate Finance",
+    type: "Bridge",
+    description: "Stargate Finance는 네이티브 자산 브릿지 프로토콜입니다.",
+  },
+  "0x2796317b0ff8538f253012862c06787adfb8ceb6": {
+    name: "Synapse Protocol",
+    type: "Bridge",
+    description: "Synapse Protocol은 크로스체인 브릿지 및 스왑 프로토콜입니다.",
+  },
+  // CEX
+  "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be": {
+    name: "Binance Hot Wallet",
+    type: "CEX",
+    description:
+      "Binance 거래소의 핫 월렛 주소로, 사용자 입출금을 처리하는 중앙화 거래소 주소입니다.",
+  },
+  "0x28c6c06298d514db089934071355e5743bf21d60": {
+    name: "Binance Hot Wallet",
+    type: "CEX",
+    description: "Binance 거래소의 핫 월렛 주소입니다.",
+  },
+  "0x71660c4005ba85c37ccec55d0c4493e66fe775d3": {
+    name: "Coinbase",
+    type: "CEX",
+    description: "Coinbase 거래소의 주소입니다.",
+  },
+  "0x2910543af39aba0cd09dbb2d50200b3e800a63d2": {
+    name: "Kraken",
+    type: "CEX",
+    description: "Kraken 거래소의 주소입니다.",
+  },
+  // 믹서
+  "0x8589427373d6d84e98730d7795d8f6f8731fda16": {
+    name: "Tornado Cash",
+    type: "Mixer",
+    description:
+      "Tornado Cash는 프라이버시를 위한 암호화폐 믹서 서비스입니다. OFAC 제재 대상입니다.",
+  },
+  "0x910cbd523d972eb0a6f4cae4618ad62622b39dbf": {
+    name: "Mixer Service",
+    type: "Mixer",
+    description:
+      "암호화폐 믹서 서비스로, 거래 추적을 어렵게 만드는 프라이버시 도구입니다.",
+  },
+  "0xa160cdab225685da1d56aa342ad8841c3b53f291": {
+    name: "Mixer Service",
+    type: "Mixer",
+    description: "암호화폐 믹서 서비스입니다.",
+  },
+};
+
+// 주소 라벨링 함수
+function getAddressLabel(
+  address: string
+): { name: string; type: string; description: string } | null {
+  const addrLower = address.toLowerCase();
+  return ADDRESS_LABELS[addrLower] || null;
+}
+
 export default function AdhocPage() {
   // 페이지 정보 (직접 정의)
   const title = "Ad-hoc 분석";
@@ -110,11 +201,17 @@ export default function AdhocPage() {
 
           const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
 
+          // 주소 라벨링 정보 가져오기
+          const addressLabel = getAddressLabel(nodeAddress);
+          const displayLabel = addressLabel
+            ? `${addressLabel.name} (${addressLabel.type})`
+            : node.label || "Unknown";
+
           return {
             address: nodeAddress,
-            label: node.label || "Unknown",
+            label: displayLabel,
             chain: getChainName(node.chain_id || node.chain || chainId),
-            type: node.type || "unknown",
+            type: addressLabel?.type.toLowerCase() || node.type || "unknown",
             isWarning: node.isWarning || node.is_warning || false,
             isTarget: isTargetNode, // 타겟 주소 마킹!
             canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
@@ -259,11 +356,17 @@ export default function AdhocPage() {
             return null;
           }
 
+          // 주소 라벨링 정보 가져오기
+          const addressLabel = getAddressLabel(nodeAddr);
+          const displayLabel = addressLabel
+            ? `${addressLabel.name} (${addressLabel.type})`
+            : node.label || "Unknown";
+
           return {
             address: nodeAddr,
-            label: node.label || "Unknown",
+            label: displayLabel,
             chain: getChainName(node.chain_id || node.chain || chainId),
-            type: node.type || "unknown",
+            type: addressLabel?.type.toLowerCase() || node.type || "unknown",
             isWarning: node.isWarning || node.is_warning || false,
             isTarget: false, // 확장된 노드는 타겟이 아님
             canExpand: true, // 확장 가능
@@ -414,11 +517,17 @@ export default function AdhocPage() {
 
           const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
 
+          // 주소 라벨링 정보 가져오기
+          const addressLabel = getAddressLabel(nodeAddress);
+          const displayLabel = addressLabel
+            ? `${addressLabel.name} (${addressLabel.type})`
+            : node.label || "Unknown";
+
           return {
             address: nodeAddress,
-            label: node.label || "Unknown",
+            label: displayLabel,
             chain: getChainName(node.chain_id || node.chain || chainId),
-            type: node.type || "unknown",
+            type: addressLabel?.type.toLowerCase() || node.type || "unknown",
             isWarning: node.isWarning || node.is_warning || false,
             isTarget: isTargetNode, // 타겟 주소 마킹!
             canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
@@ -763,6 +872,85 @@ export default function AdhocPage() {
                     >
                       {nodeDetails.target_address}
                     </S.DetailValue>
+                    {/* 주소 라벨링 정보 */}
+                    {(() => {
+                      const addressLabel = getAddressLabel(
+                        nodeDetails.target_address
+                      );
+                      if (addressLabel) {
+                        return (
+                          <div
+                            style={{
+                              marginTop: "12px",
+                              padding: "12px",
+                              background: "rgba(59, 130, 246, 0.1)",
+                              border: "1px solid rgba(59, 130, 246, 0.2)",
+                              borderRadius: "8px",
+                            }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "8px",
+                                marginBottom: "8px",
+                              }}
+                            >
+                              <span
+                                style={{
+                                  background:
+                                    addressLabel.type === "DEX"
+                                      ? "rgba(16, 185, 129, 0.3)"
+                                      : addressLabel.type === "Bridge"
+                                      ? "rgba(139, 92, 246, 0.3)"
+                                      : addressLabel.type === "CEX"
+                                      ? "rgba(59, 130, 246, 0.3)"
+                                      : addressLabel.type === "Mixer"
+                                      ? "rgba(239, 68, 68, 0.3)"
+                                      : "rgba(59, 130, 246, 0.2)",
+                                  color:
+                                    addressLabel.type === "DEX"
+                                      ? "#6ee7b7"
+                                      : addressLabel.type === "Bridge"
+                                      ? "#c4b5fd"
+                                      : addressLabel.type === "CEX"
+                                      ? "#93c5fd"
+                                      : addressLabel.type === "Mixer"
+                                      ? "#fca5a5"
+                                      : "#bfdbfe",
+                                  padding: "4px 8px",
+                                  borderRadius: "4px",
+                                  fontSize: "11px",
+                                  fontWeight: 600,
+                                  textTransform: "uppercase",
+                                }}
+                              >
+                                {addressLabel.type}
+                              </span>
+                              <span
+                                style={{
+                                  fontSize: "14px",
+                                  fontWeight: 600,
+                                  color: "var(--white, #fff)",
+                                }}
+                              >
+                                {addressLabel.name}
+                              </span>
+                            </div>
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "var(--primary400, #aeb9e1)",
+                                lineHeight: 1.5,
+                              }}
+                            >
+                              {addressLabel.description}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                   </S.DetailSection>
 
                   {/* 리스크 점수 */}
