@@ -331,7 +331,7 @@ export default function AdhocPage() {
           style={{
             display: "flex",
             alignItems: "center",
-            gap: "12px",
+            gap: "20px",
             width: "100%",
           }}
         >

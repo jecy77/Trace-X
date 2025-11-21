@@ -22,8 +22,7 @@ export default function SearchBar({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && onSearch?.()}
         />
-
-        <S.SearchButton onClick={onSearch}>Search</S.SearchButton>
+        {/* Search 버튼 제거 - 분석하기 버튼만 사용 */}
       </S.InputWrapper>
     </S.Container>
   );

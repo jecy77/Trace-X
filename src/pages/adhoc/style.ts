@@ -10,6 +10,7 @@ export const HeaderSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 5px;
+  margin-bottom: 30px;
 `;
 
 export const Title = styled.div`
@@ -34,13 +35,13 @@ export const Intro = styled.div`
 export const SearchSection = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
-  margin-bottom: 32px;
+  gap: 24px;
+  margin-bottom: 40px;
 `;
 
 export const ModeSelector = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 16px;
 `;
 
 export const ModeButton = styled.button<{ $active: boolean }>`
@@ -97,7 +98,7 @@ export const ChainSelect = styled.select`
 
 export const AnalyzeButton = styled.button`
   padding: 14px 32px;
-  background: var(--primary500, #7c8dd8);
+  background: var(--red300, #ff5a65);
   color: var(--white, #fff);
   border: none;
   border-radius: 8px;
@@ -109,7 +110,7 @@ export const AnalyzeButton = styled.button`
   font-family: "Mona Sans";
 
   &:hover:not(:disabled) {
-    background: var(--primary600, #6b7bc7);
+    background: #ff6b7f;
   }
 
   &:disabled {
@@ -120,11 +121,11 @@ export const AnalyzeButton = styled.button`
 
 export const TestAddressHint = styled.div`
   display: flex;
-  gap: 12px;
+  gap: 16px;
   align-items: center;
   font-size: 13px;
   color: var(--primary400, #aeb9e1);
-  margin-top: 8px;
+  margin-top: 12px;
 `;
 
 export const ErrorMessage = styled.div`
