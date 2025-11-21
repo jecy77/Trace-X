@@ -159,7 +159,7 @@ export default function HomePage() {
                         const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
                         return avg.toFixed(2);
                       })()
-                    : "0.0"}
+                    : "3.2"}
                 </S.RiskValue>
 
                 <S.RiskDiff $isUp>
