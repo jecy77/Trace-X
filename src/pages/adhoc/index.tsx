@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
 import * as S from "./style";
 import SearchBar from "@/components/SearchBar";
-import Graph, { GraphData, GraphNodeData } from "@/components/adhoc/Graph";
+import Graph, {
+  GraphData,
+  GraphNodeData,
+  GraphEdgeData,
+} from "@/components/adhoc/Graph";
 import {
   getFundFlow,
   getFundFlowByTxHash,
@@ -32,6 +36,7 @@ export default function AdhocPage() {
   const [currentHops, setCurrentHops] = useState(1); // 현재 표시 중인 홉 수
   const [currentMaxAddresses, setCurrentMaxAddresses] = useState(5); // 현재 주소 제한
   const [isInitialLoad, setIsInitialLoad] = useState(true); // 초기 로드 여부
+  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set()); // 확장된 노드 추적
 
   // 선택된 노드의 상세 정보
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -69,6 +74,7 @@ export default function AdhocPage() {
     setCurrentHops(1);
     setCurrentMaxAddresses(5);
     setIsInitialLoad(true); // 초기 로드 상태로 설정
+    setExpandedNodes(new Set()); // 확장된 노드 초기화
 
     try {
       let fundFlowData;
@@ -110,6 +116,7 @@ export default function AdhocPage() {
             type: node.type || "unknown",
             isWarning: node.isWarning || node.is_warning || false,
             isTarget: isTargetNode, // 타겟 주소 마킹!
+            canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
           };
         }),
         edges: fundFlowData.edges.map((edge: any) => {
@@ -182,7 +189,142 @@ export default function AdhocPage() {
     }
   };
 
-  // 3. 그래프 확장 (더 많은 노드 로드)
+  // 3. 노드를 타겟으로 설정하고 1-hop 확장 (기존 그래프에 병합)
+  const handleExpandNodeAsTarget = async (nodeAddress: string) => {
+    if (!nodeAddress.trim() || !graphData) return;
+
+    const nodeAddressLower = nodeAddress.trim().toLowerCase();
+
+    // 이미 확장된 노드인지 확인
+    if (expandedNodes.has(nodeAddressLower)) {
+      setError("이미 확장된 노드입니다.");
+      return;
+    }
+
+    // 현재 타겟 주소와 같으면 확장하지 않음
+    if (nodeAddressLower === address.trim().toLowerCase()) {
+      setError("이미 타겟 주소입니다.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // 새로운 노드의 1-hop 거래 로드
+      let fundFlowData;
+      if (analysisMode === "address") {
+        fundFlowData = await getFundFlow(
+          nodeAddress.trim(),
+          chainId,
+          1, // max_hops: 1홉만
+          5 // max_addresses: 방향당 5개만
+        );
+      } else {
+        fundFlowData = await getFundFlowByTxHash(
+          nodeAddress.trim(),
+          chainId,
+          1,
+          5
+        );
+      }
+
+      // 기존 노드와 엣지 주소 Set 생성 (중복 체크용)
+      const existingNodeAddresses = new Set(
+        graphData.nodes.map((n) => n.address.toLowerCase())
+      );
+      const existingEdges = new Set(
+        graphData.edges.map(
+          (e) => `${e.source.toLowerCase()}-${e.target.toLowerCase()}`
+        )
+      );
+
+      // 새로운 노드 추가 (중복 제외)
+      const newNodes: GraphNodeData[] = fundFlowData.nodes
+        .map((node: any) => {
+          let nodeAddr = node.address || node.id;
+          if (nodeAddr && nodeAddr.includes("-")) {
+            nodeAddr = nodeAddr.split("-")[1];
+          }
+
+          const nodeAddrLower = nodeAddr.toLowerCase();
+
+          // 이미 존재하는 노드는 건너뛰기
+          if (existingNodeAddresses.has(nodeAddrLower)) {
+            return null;
+          }
+
+          return {
+            address: nodeAddr,
+            label: node.label || "Unknown",
+            chain: getChainName(node.chain_id || node.chain || chainId),
+            type: node.type || "unknown",
+            isWarning: node.isWarning || node.is_warning || false,
+            isTarget: false, // 확장된 노드는 타겟이 아님
+            canExpand: true, // 확장 가능
+          };
+        })
+        .filter(
+          (node: GraphNodeData | null): node is GraphNodeData => node !== null
+        );
+
+      // 새로운 엣지 추가 (중복 제외)
+      const newEdges: GraphEdgeData[] = fundFlowData.edges
+        .map((edge: any) => {
+          let fromAddr = edge.from_address || "";
+          let toAddr = edge.to_address || "";
+
+          if (fromAddr.includes("-")) {
+            fromAddr = fromAddr.split("-")[1];
+          }
+          if (toAddr.includes("-")) {
+            toAddr = toAddr.split("-")[1];
+          }
+
+          const edgeKey = `${fromAddr.toLowerCase()}-${toAddr.toLowerCase()}`;
+
+          // 이미 존재하는 엣지는 건너뛰기
+          if (existingEdges.has(edgeKey)) {
+            return null;
+          }
+
+          return {
+            source: fromAddr,
+            target: toAddr,
+            type: edge.tx_type || "transfer",
+            asset: edge.token_symbol || "ETH",
+            amount: edge.amount || "0",
+            timestamp: edge.timestamp
+              ? new Date(Number(edge.timestamp) * 1000).toISOString()
+              : undefined,
+          };
+        })
+        .filter(
+          (edge: GraphEdgeData | null): edge is GraphEdgeData => edge !== null
+        );
+
+      // 기존 그래프 데이터에 새로운 노드와 엣지 병합
+      const mergedGraphData: GraphData = {
+        nodes: [...graphData.nodes, ...newNodes],
+        edges: [...graphData.edges, ...newEdges],
+      };
+
+      setGraphData(mergedGraphData);
+
+      // 확장된 노드로 표시
+      setExpandedNodes((prev) => new Set(prev).add(nodeAddressLower));
+
+      // 사이드바는 유지 (닫지 않음)
+    } catch (err) {
+      setError(
+        err instanceof Error ? err.message : "노드 확장 중 오류가 발생했습니다."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 4. 그래프 확장 (더 많은 노드 로드)
   const handleExpandGraph = async (level: "more" | "all") => {
     if (!address.trim()) return;
 
@@ -244,6 +386,7 @@ export default function AdhocPage() {
             type: node.type || "unknown",
             isWarning: node.isWarning || node.is_warning || false,
             isTarget: isTargetNode, // 타겟 주소 마킹!
+            canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
           };
         }),
         edges: fundFlowData.edges.map((edge: any) => {
@@ -527,6 +670,62 @@ export default function AdhocPage() {
                       <S.DetailValue>{nodeDetails.explanation}</S.DetailValue>
                     </S.DetailSection>
                   )}
+
+                  {/* 확장 버튼 (타겟 주소가 아닌 경우에만 표시, 맨 아래) */}
+                  {selectedNode &&
+                    selectedNode.toLowerCase() !==
+                      address.trim().toLowerCase() && (
+                      <div
+                        style={{
+                          marginTop: "24px",
+                          paddingTop: "24px",
+                          borderTop: "1px solid var(--secondary200, #343b4f)",
+                        }}
+                      >
+                        <button
+                          onClick={() => handleExpandNodeAsTarget(selectedNode)}
+                          disabled={loading}
+                          style={{
+                            width: "100%",
+                            padding: "10px 16px",
+                            background: "var(--neutral800, #060a1d)",
+                            color: "var(--primary400, #aeb9e1)",
+                            border: "1px solid var(--secondary200, #343b4f)",
+                            borderRadius: "8px",
+                            fontSize: "13px",
+                            fontWeight: 600,
+                            cursor: loading ? "not-allowed" : "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: "8px",
+                            transition: "all 0.2s ease",
+                            opacity: loading ? 0.5 : 1,
+                            fontFamily: "Mona Sans",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (!loading) {
+                              e.currentTarget.style.background =
+                                "var(--secondary200, #343b4f)";
+                              e.currentTarget.style.borderColor =
+                                "var(--primary500, #7c8dd8)";
+                              e.currentTarget.style.color = "var(--white, #fff)";
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.background =
+                              "var(--neutral800, #060a1d)";
+                            e.currentTarget.style.borderColor =
+                              "var(--secondary200, #343b4f)";
+                            e.currentTarget.style.color =
+                              "var(--primary400, #aeb9e1)";
+                          }}
+                        >
+                          <span style={{ fontSize: "14px" }}>→</span>
+                          <span>{loading ? "확장 중..." : "이 노드 확장"}</span>
+                        </button>
+                      </div>
+                    )}
                 </>
               ) : (
                 <S.ErrorMessage>

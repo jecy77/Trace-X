@@ -22,6 +22,7 @@ export type GraphNodeData = {
   type: string;
   isWarning: boolean;
   isTarget: boolean; // 타겟 주소 여부
+  canExpand?: boolean; // 확장 가능 여부
 };
 
 export type GraphEdgeData = {
@@ -49,10 +50,13 @@ const CustomNode = ({ data }: CustomNodeProps) => {
     : "Unknown";
   const isHighRisk = data.isWarning;
   const isTarget = data.isTarget; // 타겟 주소 여부
+  const canExpand = data.canExpand && !isTarget; // 확장 가능하고 타겟이 아닌 경우
 
   // 타겟 주소일 경우 특별한 스타일 적용
   const borderColor = isTarget
     ? "#10b981" // 초록색
+    : canExpand
+    ? "#667eea" // 보라색 (확장 가능)
     : isHighRisk
     ? "#ef4444" // 빨간색
     : "#3b82f6"; // 파란색
@@ -166,6 +170,7 @@ const CustomNode = ({ data }: CustomNodeProps) => {
           display: "flex",
           gap: "6px",
           flexWrap: "wrap",
+          alignItems: "center",
         }}
       >
         <span
@@ -186,6 +191,18 @@ const CustomNode = ({ data }: CustomNodeProps) => {
         >
           {data.chain}
         </span>
+        {canExpand && (
+          <span
+            style={{
+              fontSize: 14,
+              color: "#667eea",
+              fontWeight: "bold",
+              marginLeft: "auto",
+            }}
+          >
+            →
+          </span>
+        )}
       </div>
     </div>
   );
