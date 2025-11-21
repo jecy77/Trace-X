@@ -1,32 +1,33 @@
 import styled from "styled-components";
 
 export const Root = styled.div`
-  padding: 24px 50px;
+  padding: 18px 50px;
   width: 100%;
-  min-height: 100vh;
-  position: relative;
-  background: linear-gradient(135deg, #0a0f1e 0%, #0f1729 100%);
+  overflow-y: scroll;
 `;
 
 export const HeaderSection = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 24px;
+  flex-direction: column;
+  gap: 5px;
 `;
 
 export const Title = styled.div`
-  color: #fff;
+  color: var(--white, #fff);
   font-family: "Mona Sans";
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 32px;
 `;
 
 export const Intro = styled.div`
-  color: #aeb9e1;
-  font-size: 14px;
-  line-height: 1.5;
+  color: var(--primary400, #aeb9e1);
+  font-family: "Mona Sans";
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 14px;
 `;
 
 // 검색 영역
@@ -46,72 +47,74 @@ export const ModeButton = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   background: ${(props) =>
     props.$active
-      ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-      : "#1f2937"};
-  color: white;
-  border: 2px solid ${(props) => (props.$active ? "#3b82f6" : "#374151")};
+      ? "var(--primary500, #7c8dd8)"
+      : "var(--neutral800, #060a1d)"};
+  color: var(--white, #fff);
+  border: 1px solid
+    ${(props) =>
+      props.$active
+        ? "var(--primary500, #7c8dd8)"
+        : "var(--secondary200, #343b4f)"};
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: "Mona Sans";
 
   &:hover {
     background: ${(props) =>
       props.$active
-        ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
-        : "#374151"};
-    border-color: #3b82f6;
+        ? "var(--primary600, #6b7bc7)"
+        : "var(--secondary200, #343b4f)"};
+    border-color: var(--primary500, #7c8dd8);
   }
 `;
 
 export const ChainSelect = styled.select`
   padding: 14px 18px;
-  background: #1f2937;
-  color: white;
-  border: 2px solid #374151;
-  border-radius: 10px;
+  background: var(--neutral800, #060a1d);
+  color: var(--white, #fff);
+  border: 1px solid var(--secondary200, #343b4f);
+  border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   min-width: 140px;
   transition: all 0.2s ease;
+  font-family: "Mona Sans";
 
   &:focus {
     outline: none;
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--primary500, #7c8dd8);
   }
 
   option {
-    background: #1f2937;
-    color: white;
+    background: var(--neutral800, #060a1d);
+    color: var(--white, #fff);
   }
 `;
 
 export const AnalyzeButton = styled.button`
   padding: 14px 32px;
-  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-  color: white;
+  background: var(--primary500, #7c8dd8);
+  color: var(--white, #fff);
   border: none;
-  border-radius: 10px;
+  border-radius: 8px;
   font-size: 16px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  font-family: "Mona Sans";
 
   &:hover:not(:disabled) {
-    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.5);
-    transform: translateY(-1px);
+    background: var(--primary600, #6b7bc7);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
   }
 `;
 
@@ -120,15 +123,15 @@ export const TestAddressHint = styled.div`
   gap: 12px;
   align-items: center;
   font-size: 13px;
-  color: #6b7280;
+  color: var(--primary400, #aeb9e1);
   margin-top: 8px;
 `;
 
 export const ErrorMessage = styled.div`
   padding: 16px 20px;
   background: rgba(239, 68, 68, 0.1);
-  border: 2px solid rgba(239, 68, 68, 0.3);
-  border-radius: 10px;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
   color: #fca5a5;
   font-size: 14px;
   margin-bottom: 24px;
@@ -137,14 +140,14 @@ export const ErrorMessage = styled.div`
 export const EmptyMessage = styled.div`
   text-align: center;
   padding: 80px 20px;
-  color: #6b7280;
+  color: var(--primary400, #aeb9e1);
   font-size: 16px;
 `;
 
 export const LoadingMessage = styled.div`
   text-align: center;
   padding: 40px 20px;
-  color: #9ca3af;
+  color: var(--primary400, #aeb9e1);
   font-size: 14px;
 `;
 
@@ -167,14 +170,13 @@ export const GraphControlBar = styled.div`
   align-items: center;
   margin-top: 16px;
   padding: 16px 20px;
-  background: rgba(31, 41, 55, 0.8);
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 12px;
-  backdrop-filter: blur(10px);
+  background: var(--neutral800, #060a1d);
+  border: 1px solid var(--secondary200, #343b4f);
+  border-radius: 8px;
 `;
 
 export const GraphInfo = styled.div`
-  color: #9ca3af;
+  color: var(--primary400, #aeb9e1);
   font-size: 14px;
   font-weight: 600;
 `;
@@ -189,40 +191,43 @@ export const ExpandButton = styled.button<{ primary?: boolean }>`
   padding: 10px 24px;
   background: ${(props) =>
     props.primary
-      ? "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-      : "rgba(59, 130, 246, 0.2)"};
-  color: white;
-  border: 2px solid ${(props) => (props.primary ? "#3b82f6" : "#374151")};
+      ? "var(--primary500, #7c8dd8)"
+      : "var(--neutral800, #060a1d)"};
+  color: var(--white, #fff);
+  border: 1px solid
+    ${(props) =>
+      props.primary
+        ? "var(--primary500, #7c8dd8)"
+        : "var(--secondary200, #343b4f)"};
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
+  font-family: "Mona Sans";
 
   &:hover:not(:disabled) {
     background: ${(props) =>
       props.primary
-        ? "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)"
-        : "rgba(59, 130, 246, 0.3)"};
-    border-color: #3b82f6;
-    transform: translateY(-1px);
+        ? "var(--primary600, #6b7bc7)"
+        : "var(--secondary200, #343b4f)"};
+    border-color: var(--primary500, #7c8dd8);
   }
 
   &:disabled {
     opacity: 0.4;
     cursor: not-allowed;
-    transform: none;
   }
 `;
 
 export const ButtonHint = styled.span`
   font-size: 10px;
   font-weight: 400;
-  color: #cbd5e1;
+  color: var(--primary400, #aeb9e1);
   opacity: 0.8;
 `;
 
@@ -232,11 +237,10 @@ export const DetailsSidebar = styled.div`
   min-width: 400px;
   max-height: 75vh;
   overflow-y: auto;
-  background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-  border: 2px solid rgba(59, 130, 246, 0.3);
-  border-radius: 16px;
+  background: var(--neutral800, #060a1d);
+  border: 1px solid var(--secondary200, #343b4f);
+  border-radius: 8px;
   padding: 24px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 
   /* 스크롤바 스타일 */
   &::-webkit-scrollbar {
@@ -264,20 +268,21 @@ export const SidebarHeader = styled.div`
   align-items: center;
   margin-bottom: 24px;
   padding-bottom: 16px;
-  border-bottom: 2px solid rgba(59, 130, 246, 0.2);
+  border-bottom: 1px solid var(--secondary200, #343b4f);
 `;
 
 export const SidebarTitle = styled.h3`
-  color: white;
+  color: var(--white, #fff);
   font-size: 18px;
-  font-weight: 700;
+  font-weight: 600;
   margin: 0;
+  font-family: "Mona Sans";
 `;
 
 export const CloseButton = styled.button`
   background: rgba(239, 68, 68, 0.2);
   color: #fca5a5;
-  border: 2px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(239, 68, 68, 0.3);
   border-radius: 8px;
   width: 32px;
   height: 32px;
@@ -304,18 +309,20 @@ export const DetailSection = styled.div`
 `;
 
 export const DetailLabel = styled.div`
-  color: #9ca3af;
+  color: var(--primary400, #aeb9e1);
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
   margin-bottom: 8px;
+  font-family: "Mona Sans";
 `;
 
 export const DetailValue = styled.div`
-  color: #e5e7eb;
+  color: var(--white, #fff);
   font-size: 14px;
   line-height: 1.6;
+  font-family: "Mona Sans";
 `;
 
 export const RiskScore = styled.div`
@@ -360,11 +367,16 @@ export const RuleItem = styled.div`
   justify-content: space-between;
   align-items: center;
   padding: 10px 14px;
-  background: rgba(31, 41, 55, 0.5);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--secondary200, #343b4f);
   border-radius: 8px;
-  color: #e5e7eb;
+  color: var(--white, #fff);
   font-size: 13px;
+  font-family: "Mona Sans";
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
 `;
 
 // 기존 컴포넌트 (호환성 유지)

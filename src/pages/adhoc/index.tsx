@@ -18,7 +18,7 @@ const CHAINS = [
 
 export default function AdhocPage() {
   // 페이지 정보 (직접 정의)
-  const title = "수동 탐지";
+  const title = "Ad-hoc 분석";
   const intro = "주소 또는 트랜잭션을 분석하여 위험도를 평가합니다.";
 
   const [address, setAddress] = useState("");
