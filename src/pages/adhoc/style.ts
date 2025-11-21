@@ -155,8 +155,8 @@ export const ContentLayout = styled.div`
   align-items: flex-start;
 `;
 
-export const GraphSection = styled.div<{ hasDetails: boolean }>`
-  flex: ${(props) => (props.hasDetails ? "1" : "1")};
+export const GraphSection = styled.div<{ $hasDetails: boolean }>`
+  flex: ${(props) => (props.$hasDetails ? "1" : "1")};
   transition: flex 0.3s ease;
 `;
 

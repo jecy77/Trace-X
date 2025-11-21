@@ -407,7 +407,7 @@ export default function AdhocPage() {
       {graphData && (
         <S.ContentLayout>
           {/* 왼쪽: 그래프 */}
-          <S.GraphSection hasDetails={!!selectedNode}>
+          <S.GraphSection $hasDetails={!!selectedNode}>
             <Graph
               data={graphData}
               onNodeClick={handleNodeClick}

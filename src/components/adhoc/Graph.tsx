@@ -9,6 +9,7 @@ import ReactFlow, {
   Background,
   MiniMap,
   useReactFlow,
+  ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import dagre from "dagre";
@@ -462,4 +463,15 @@ export function Graph({
   );
 }
 
-export default Graph;
+// Wrap with ReactFlowProvider
+export default function GraphWithProvider(props: {
+  data: GraphData;
+  onNodeClick?: (address: string) => void;
+  fitViewOnMount: boolean;
+}) {
+  return (
+    <ReactFlowProvider>
+      <Graph {...props} />
+    </ReactFlowProvider>
+  );
+}
