@@ -11,6 +11,8 @@ export const LeftChartSection = styled.div`
 
 export const LeftHeader = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: 20px;
   justify-content: space-between;
   align-items: flex-start;
 `;
