@@ -149,7 +149,7 @@ export const FilterGroup = styled.div`
   align-items: center;
   gap: 0;
   background: #091027;
-  border: 1px solid #1f294b;
+
   border-radius: 10px;
   max-width: 500px;
 `;
@@ -233,5 +233,28 @@ export const DropdownMenu = styled.ul`
       opacity: 1;
       transform: translateY(0);
     }
+  }
+`;
+export const SearchWrapper = styled.div`
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  input {
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #444;
+    background: #1e1e1e;
+    color: white;
+    width: 200px;
+  }
+
+  button {
+    padding: 8px 14px;
+    background: #1e1e1e;
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
   }
 `;

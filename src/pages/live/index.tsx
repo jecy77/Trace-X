@@ -68,9 +68,6 @@ const mapBackendToTxData = (raw: BackendTx): TxData => {
   };
 };
 
-/* -------------------- 토큰 목록 -------------------- */
-const tokens = ["ETH", "USDT", "USDC", "BTC", "DAI"];
-
 /* -------------------- LivePage Component -------------------- */
 export default function LivePage() {
   const { title, intro } = useOutletContext<LayoutContext>();
@@ -79,20 +76,24 @@ export default function LivePage() {
   const [loading, setLoading] = useState(true);
 
   const [page, setPage] = useState(1);
-  const [selectedChain, setSelectedChain] = useState("전체");
-  const [openMenu, setOpenMenu] = useState<null | "chain">(null);
+
+  // 입력값 (API 호출 X)
+  const [searchInput, setSearchInput] = useState("");
+
+  // 실제 검색에 사용되는 토큰 (API 호출 O)
+  const [searchToken, setSearchToken] = useState("");
 
   /* -------------------- API 요청 -------------------- */
   useEffect(() => {
-    let isMounted = true; // 🔥 race 방지
-    setLoading(true); // 🔥 매 요청마다 테이블 리셋
+    let isMounted = true;
+    setLoading(true);
 
     async function fetchData() {
       try {
         const params = new URLSearchParams();
 
-        if (selectedChain !== "전체") {
-          params.append("tokenFilter", selectedChain);
+        if (searchToken.trim() !== "") {
+          params.append("tokenFilter", searchToken.trim());
         }
 
         params.append("pageNo", String(page));
@@ -104,16 +105,11 @@ export default function LivePage() {
         const res = await fetch(url);
         const json = await res.json();
 
-        console.log("🔥 Raw Backend:", json);
-
-        const mappedData =
+        const mapped =
           json.data?.map((item: BackendTx) => mapBackendToTxData(item)) ?? [];
 
-        if (isMounted) {
-          setData(mappedData);
-        }
+        if (isMounted) setData(mapped);
       } catch (e) {
-        console.error("API ERROR:", e);
         if (isMounted) setData([]);
       } finally {
         if (isMounted) setLoading(false);
@@ -121,11 +117,10 @@ export default function LivePage() {
     }
 
     fetchData();
-
     return () => {
-      isMounted = false; // cleanup
+      isMounted = false;
     };
-  }, [selectedChain, page]);
+  }, [searchToken, page]);
 
   /* -------------------- 렌더링 -------------------- */
   return (
@@ -135,35 +130,34 @@ export default function LivePage() {
         <S.Intro>{intro}</S.Intro>
       </S.HeaderSection>
 
-      {/* 필터 바 */}
+      {/* 검색 바 */}
       <S.FilterBar>
         <S.FilterGroup>
           <S.Divider />
 
-          <S.DropdownWrapper>
-            <S.FilterSelect
-              onClick={() => setOpenMenu(openMenu === "chain" ? null : "chain")}
-            >
-              토큰 ({selectedChain}) ▼
-            </S.FilterSelect>
+          <S.SearchWrapper>
+            <input
+              type="text"
+              placeholder="토큰 검색 (예: ETH, USDT...)"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  setSearchToken(searchInput.trim());
+                  setPage(1);
+                }
+              }}
+            />
 
-            {openMenu === "chain" && (
-              <S.DropdownMenu>
-                {["전체", ...tokens].map((c) => (
-                  <li
-                    key={c}
-                    onClick={() => {
-                      setSelectedChain(c);
-                      setPage(1); // 필터 바꾸면 page 리셋
-                      setOpenMenu(null);
-                    }}
-                  >
-                    {c}
-                  </li>
-                ))}
-              </S.DropdownMenu>
-            )}
-          </S.DropdownWrapper>
+            <button
+              onClick={() => {
+                setSearchToken(searchInput.trim());
+                setPage(1);
+              }}
+            >
+              검색
+            </button>
+          </S.SearchWrapper>
         </S.FilterGroup>
       </S.FilterBar>
 
