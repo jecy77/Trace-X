@@ -4,13 +4,14 @@ import * as S from "./style";
 import SearchBar from "@/components/SearchBar";
 import Graph from "@/components/adhoc/Graph";
 import { getFundFlow } from "@/api/getFundFlow";
+import type { GraphData } from "@/components/adhoc/Graph";
 
 export default function AdhocResultPage() {
   const [params] = useSearchParams();
   const navigate = useNavigate();
 
   const [value, setValue] = useState(params.get("tx") || "");
-  const [graphData, setGraphData] = useState(null);
+  const [graphData, setGraphData] = useState<GraphData | null>(null);
 
   /* ---------------- 검색 시 URL 갱신 ---------------- */
   const handleSearch = () => {
@@ -45,7 +46,13 @@ export default function AdhocResultPage() {
       </S.HeaderSection>
 
       {/* 그래프 */}
-      <Graph data={graphData} />
+      {graphData && (
+        <Graph
+          data={graphData}
+          onNodeClick={undefined}
+          fitViewOnMount={true}
+        />
+      )}
     </S.Root>
   );
 }
