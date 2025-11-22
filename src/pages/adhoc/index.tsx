@@ -211,6 +211,19 @@ export default function AdhocPage() {
         );
       }
 
+      // 빈 데이터 체크
+      if (
+        !fundFlowData ||
+        !fundFlowData.nodes ||
+        fundFlowData.nodes.length === 0
+      ) {
+        setError(
+          "해당 주소에 거래 내역이 없습니다. 다른 주소를 시도해보세요.\n예시: 0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be (Binance Hot Wallet)"
+        );
+        setGraphData(null);
+        return;
+      }
+
       // GraphData 형식으로 변환
       const searchedAddress = address.trim().toLowerCase(); // 검색한 타겟 주소
 
