@@ -80,7 +80,7 @@ export const Table = styled.table`
 export const TableRow = styled.tr<{ $risk: string }>`
   background: ${({ $risk }) =>
     $risk === "위험" ? "rgba(126, 39, 57, 0.2)" : "rgba(255,255,255,0.02)"};
-
+  cursor: pointer;
   &:hover {
     background: rgba(255, 255, 255, 0.08);
   }

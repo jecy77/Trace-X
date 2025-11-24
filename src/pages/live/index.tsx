@@ -180,7 +180,13 @@ export default function LivePage() {
 
           <tbody>
             {data.map((tx) => (
-              <S.TableRow key={tx.id} $risk={tx.risk}>
+              <S.TableRow
+                key={tx.id}
+                $risk={tx.risk}
+                onClick={() =>
+                  window.open(`https://etherscan.io/tx/${tx.id}`, "_blank")
+                }
+              >
                 <td title={tx.id}>{shorten(tx.id)}</td>
                 <td title={tx.from}>{shorten(tx.from)}</td>
                 <td title={tx.to}>{shorten(tx.to)}</td>

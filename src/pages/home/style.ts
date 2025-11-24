@@ -300,7 +300,7 @@ export const Table = styled.table`
 export const TableRow = styled.tr`
   background: rgba(255, 255, 255, 0.03);
   transition: background 0.2s ease;
-  /* cursor: pointer; */
+  cursor: pointer;
 
   &:hover {
     background: rgba(255, 255, 255, 0.08);

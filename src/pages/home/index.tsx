@@ -324,7 +324,15 @@ export default function HomePage() {
 
               <tbody>
                 {monitoring.map((item, idx) => (
-                  <S.TableRow key={item.txHash + idx}>
+                  <S.TableRow
+                    key={item.txHash + idx}
+                    onClick={() =>
+                      window.open(
+                        `https://etherscan.io/tx/${item.txHash}`,
+                        "_blank"
+                      )
+                    }
+                  >
                     <td title={item.txHash}>{shorten(item.txHash)}</td>
 
                     <td>{item.timestamp}</td>
