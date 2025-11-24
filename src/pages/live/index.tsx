@@ -98,9 +98,8 @@ export default function LivePage() {
 
         params.append("pageNo", String(page));
 
-        const url = `${
-          import.meta.env.VITE_API_URL
-        }/api/live-detection/summary?${params.toString()}`;
+        const backendUrl = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
+        const url = `${backendUrl}/api/live-detection/summary?${params.toString()}`;
 
         const res = await fetch(url);
         const json = await res.json();

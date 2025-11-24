@@ -1,8 +1,7 @@
 export async function getFundFlow(address: string) {
   try {
-    const url = `${
-      import.meta.env.VITE_API_URL
-    }/api/analysis/fund-flow?chain_id=1&address=${address}`;
+    const backendUrl = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
+    const url = `${backendUrl}/api/analysis/fund-flow?chain_id=1&address=${address}`;
 
     const res = await fetch(url);
 
