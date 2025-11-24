@@ -7,10 +7,10 @@ import Graph, {
   GraphEdgeData,
 } from "@/components/adhoc/Graph";
 import {
-  getFundFlow,
   getFundFlowByTxHash,
   analyzeAddressViaBackend,
 } from "@/services/backend";
+import { getFundFlow } from "@/api/getFundFlow";
 import type { AddressAnalysisResponse } from "@/types/api";
 
 // 체인 정보
@@ -228,52 +228,65 @@ export default function AdhocPage() {
       const searchedAddress = address.trim().toLowerCase(); // 검색한 타겟 주소
 
       const graphData: GraphData = {
-        nodes: fundFlowData.nodes.map((node: any) => {
-          let nodeAddress = node.address || node.id;
-          if (nodeAddress && nodeAddress.includes("-")) {
-            nodeAddress = nodeAddress.split("-")[1];
-          }
+        nodes: (fundFlowData.nodes || [])
+          .map((node: any) => {
+            if (!node) return null;
 
-          const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
+            let nodeAddress = node?.address || node?.id || "";
+            if (nodeAddress && nodeAddress.includes("-")) {
+              nodeAddress = nodeAddress.split("-")[1];
+            }
 
-          // 주소 라벨링 정보 가져오기
-          const addressLabel = getAddressLabel(nodeAddress);
-          const displayLabel = addressLabel
-            ? `${addressLabel.name} (${addressLabel.type})`
-            : node.label || "Unknown";
+            if (!nodeAddress) return null;
 
-          return {
-            address: nodeAddress,
-            label: displayLabel,
-            chain: getChainName(node.chain_id || node.chain || chainId),
-            type: addressLabel?.type.toLowerCase() || node.type || "unknown",
-            isWarning: node.isWarning || node.is_warning || false,
-            isTarget: isTargetNode, // 타겟 주소 마킹!
-            canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
-          };
-        }),
-        edges: fundFlowData.edges.map((edge: any) => {
-          let fromAddr = edge.from_address || "";
-          let toAddr = edge.to_address || "";
+            const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
 
-          if (fromAddr.includes("-")) {
-            fromAddr = fromAddr.split("-")[1];
-          }
-          if (toAddr.includes("-")) {
-            toAddr = toAddr.split("-")[1];
-          }
+            // 주소 라벨링 정보 가져오기
+            const addressLabel = getAddressLabel(nodeAddress);
+            const displayLabel = addressLabel
+              ? `${addressLabel.name} (${addressLabel.type})`
+              : node?.label || "Unknown";
 
-          return {
-            source: fromAddr,
-            target: toAddr,
-            type: edge.tx_type || "transfer",
-            asset: edge.token_symbol || "ETH",
-            amount: edge.amount || "0",
-            timestamp: edge.timestamp
-              ? new Date(Number(edge.timestamp) * 1000).toISOString()
-              : undefined,
-          };
-        }),
+            return {
+              address: nodeAddress,
+              label: displayLabel,
+              chain: getChainName(node?.chain_id || node?.chain || chainId),
+              type:
+                addressLabel?.type?.toLowerCase() || node?.type || "unknown",
+              isWarning: node?.isWarning || node?.is_warning || false,
+              isTarget: isTargetNode, // 타겟 주소 마킹!
+              canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
+            };
+          })
+          .filter((node: any) => node !== null),
+        edges: (fundFlowData.edges || [])
+          .map((edge: any) => {
+            if (!edge) return null;
+
+            let fromAddr = edge?.from_address || "";
+            let toAddr = edge?.to_address || "";
+
+            if (fromAddr && fromAddr.includes("-")) {
+              fromAddr = fromAddr.split("-")[1];
+            }
+            if (toAddr && toAddr.includes("-")) {
+              toAddr = toAddr.split("-")[1];
+            }
+
+            if (!fromAddr || !toAddr) return null;
+
+            return {
+              source: fromAddr,
+              target: toAddr,
+              type: edge?.tx_type || "transfer",
+              asset: edge?.token_symbol || "ETH",
+              amount: edge?.amount || "0",
+              timestamp: edge?.timestamp
+                ? new Date(Number(edge.timestamp) * 1000).toISOString()
+                : undefined,
+            };
+          })
+          .filter((edge: any) => edge !== null),
       };
 
       setGraphData(graphData);
@@ -412,17 +425,21 @@ export default function AdhocPage() {
         );
 
       // 새로운 엣지 추가 (중복 제외)
-      const newEdges: GraphEdgeData[] = fundFlowData.edges
+      const newEdges: GraphEdgeData[] = (fundFlowData.edges || [])
         .map((edge: any) => {
-          let fromAddr = edge.from_address || "";
-          let toAddr = edge.to_address || "";
+          if (!edge) return null;
 
-          if (fromAddr.includes("-")) {
+          let fromAddr = edge?.from_address || "";
+          let toAddr = edge?.to_address || "";
+
+          if (fromAddr && fromAddr.includes("-")) {
             fromAddr = fromAddr.split("-")[1];
           }
-          if (toAddr.includes("-")) {
+          if (toAddr && toAddr.includes("-")) {
             toAddr = toAddr.split("-")[1];
           }
+
+          if (!fromAddr || !toAddr) return null;
 
           const edgeKey = `${fromAddr.toLowerCase()}-${toAddr.toLowerCase()}`;
 
@@ -434,10 +451,10 @@ export default function AdhocPage() {
           return {
             source: fromAddr,
             target: toAddr,
-            type: edge.tx_type || "transfer",
-            asset: edge.token_symbol || "ETH",
-            amount: edge.amount || "0",
-            timestamp: edge.timestamp
+            type: edge?.tx_type || "transfer",
+            asset: edge?.token_symbol || "ETH",
+            amount: edge?.amount || "0",
+            timestamp: edge?.timestamp
               ? new Date(Number(edge.timestamp) * 1000).toISOString()
               : undefined,
           };
@@ -544,52 +561,65 @@ export default function AdhocPage() {
       const searchedAddress = address.trim().toLowerCase(); // 검색한 타겟 주소
 
       const graphData: GraphData = {
-        nodes: fundFlowData.nodes.map((node: any) => {
-          let nodeAddress = node.address || node.id;
-          if (nodeAddress && nodeAddress.includes("-")) {
-            nodeAddress = nodeAddress.split("-")[1];
-          }
+        nodes: (fundFlowData.nodes || [])
+          .map((node: any) => {
+            if (!node) return null;
 
-          const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
+            let nodeAddress = node?.address || node?.id || "";
+            if (nodeAddress && nodeAddress.includes("-")) {
+              nodeAddress = nodeAddress.split("-")[1];
+            }
 
-          // 주소 라벨링 정보 가져오기
-          const addressLabel = getAddressLabel(nodeAddress);
-          const displayLabel = addressLabel
-            ? `${addressLabel.name} (${addressLabel.type})`
-            : node.label || "Unknown";
+            if (!nodeAddress) return null;
 
-          return {
-            address: nodeAddress,
-            label: displayLabel,
-            chain: getChainName(node.chain_id || node.chain || chainId),
-            type: addressLabel?.type.toLowerCase() || node.type || "unknown",
-            isWarning: node.isWarning || node.is_warning || false,
-            isTarget: isTargetNode, // 타겟 주소 마킹!
-            canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
-          };
-        }),
-        edges: fundFlowData.edges.map((edge: any) => {
-          let fromAddr = edge.from_address || "";
-          let toAddr = edge.to_address || "";
+            const isTargetNode = nodeAddress.toLowerCase() === searchedAddress;
 
-          if (fromAddr.includes("-")) {
-            fromAddr = fromAddr.split("-")[1];
-          }
-          if (toAddr.includes("-")) {
-            toAddr = toAddr.split("-")[1];
-          }
+            // 주소 라벨링 정보 가져오기
+            const addressLabel = getAddressLabel(nodeAddress);
+            const displayLabel = addressLabel
+              ? `${addressLabel.name} (${addressLabel.type})`
+              : node?.label || "Unknown";
 
-          return {
-            source: fromAddr,
-            target: toAddr,
-            type: edge.tx_type || "transfer",
-            asset: edge.token_symbol || "ETH",
-            amount: edge.amount || "0",
-            timestamp: edge.timestamp
-              ? new Date(Number(edge.timestamp) * 1000).toISOString()
-              : undefined,
-          };
-        }),
+            return {
+              address: nodeAddress,
+              label: displayLabel,
+              chain: getChainName(node?.chain_id || node?.chain || chainId),
+              type:
+                addressLabel?.type?.toLowerCase() || node?.type || "unknown",
+              isWarning: node?.isWarning || node?.is_warning || false,
+              isTarget: isTargetNode, // 타겟 주소 마킹!
+              canExpand: !isTargetNode, // 타겟이 아닌 노드는 확장 가능
+            };
+          })
+          .filter((node: any) => node !== null),
+        edges: (fundFlowData.edges || [])
+          .map((edge: any) => {
+            if (!edge) return null;
+
+            let fromAddr = edge?.from_address || "";
+            let toAddr = edge?.to_address || "";
+
+            if (fromAddr && fromAddr.includes("-")) {
+              fromAddr = fromAddr.split("-")[1];
+            }
+            if (toAddr && toAddr.includes("-")) {
+              toAddr = toAddr.split("-")[1];
+            }
+
+            if (!fromAddr || !toAddr) return null;
+
+            return {
+              source: fromAddr,
+              target: toAddr,
+              type: edge?.tx_type || "transfer",
+              asset: edge?.token_symbol || "ETH",
+              amount: edge?.amount || "0",
+              timestamp: edge?.timestamp
+                ? new Date(Number(edge.timestamp) * 1000).toISOString()
+                : undefined,
+            };
+          })
+          .filter((edge: any) => edge !== null),
       };
 
       setGraphData(graphData);

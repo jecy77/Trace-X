@@ -282,27 +282,42 @@ const getLayoutedElements = (nodes: Node[], edges: Edge[]) => {
     ranker: "network-simplex", // 최적화된 레이아웃 알고리즘
   });
 
-  nodes.forEach((node) => {
-    // 노드 크기
-    dagreGraph.setNode(node.id, { width: 240, height: 85 });
-  });
+  nodes
+    .filter((node) => node && node.id)
+    .forEach((node) => {
+      // 노드 크기
+      dagreGraph.setNode(node.id, { width: 240, height: 85 });
+    });
 
-  edges.forEach((edge) => {
-    dagreGraph.setEdge(edge.source, edge.target);
-  });
+  edges
+    .filter((edge) => edge && edge.source && edge.target)
+    .forEach((edge) => {
+      dagreGraph.setEdge(edge.source, edge.target);
+    });
 
   dagre.layout(dagreGraph);
 
-  const layoutedNodes = nodes.map((node) => {
-    const pos = dagreGraph.node(node.id);
-    return {
-      ...node,
-      position: { x: pos.x, y: pos.y },
-      // LR 방향에서는 Left/Right 사용
-      sourcePosition: Position.Right,
-      targetPosition: Position.Left,
-    };
-  });
+  const layoutedNodes = nodes
+    .filter((node) => node && node.id)
+    .map((node) => {
+      const pos = dagreGraph.node(node.id);
+      if (!pos) {
+        // pos가 없으면 기본 위치 반환
+        return {
+          ...node,
+          position: { x: 0, y: 0 },
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+        };
+      }
+      return {
+        ...node,
+        position: { x: pos.x || 0, y: pos.y || 0 },
+        // LR 방향에서는 Left/Right 사용
+        sourcePosition: Position.Right,
+        targetPosition: Position.Left,
+      };
+    });
 
   return { nodes: layoutedNodes, edges };
 };
@@ -320,22 +335,44 @@ export function Graph({
   const reactFlowInstance = useReactFlow(); // useReactFlow 훅 사용
   const hasFitView = useRef(false); // fitView가 실행되었는지 추적
 
+  // 데이터 안전 체크
+  if (!data || !data.nodes || !data.edges) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "700px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "#fff",
+        }}
+      >
+        데이터를 불러오는 중...
+      </div>
+    );
+  }
+
   // ----- 노드 변환 -----
   const nodes = useMemo<Node<GraphNodeData>[]>(
     () =>
-      data.nodes.map((n) => ({
-        id: n.address,
-        type: "customNode",
-        data: n,
-        position: { x: 0, y: 0 }, // 초기 위치는 0,0으로 설정 (dagre가 업데이트할 것)
-      })),
+      (data?.nodes || [])
+        .filter((n) => n && n.address)
+        .map((n) => ({
+          id: n.address,
+          type: "customNode",
+          data: n,
+          position: { x: 0, y: 0 }, // 초기 위치는 0,0으로 설정 (dagre가 업데이트할 것)
+        })),
     [data]
   );
 
   // ----- 엣지 변환 + timestamp 포함 라벨 -----
   const edges = useMemo<Edge[]>(
     () =>
-      data.edges.map((e, i) => {
+      (data?.edges || [])
+        .filter((e) => e && e.source && e.target)
+        .map((e, i) => {
         // 타임스탬프 포맷팅 (안전하게)
         let displayTimestamp = "";
         if (e.timestamp) {

@@ -1,9 +1,21 @@
-export async function getFundFlow(address: string) {
+export async function getFundFlow(
+  address: string,
+  chainId: number = 1,
+  maxHops: number = 1,
+  maxAddresses: number = 5
+) {
   try {
-    const backendUrl = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
-    const url = `${backendUrl}/api/analysis/fund-flow?chain_id=1&address=${address}`;
+    const backendUrl =
+      import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
+    const url = `${backendUrl}/api/analysis/fund-flow?chain_id=${chainId}&address=${address}&max_hops=${maxHops}&max_addresses=${maxAddresses}`;
 
-    const res = await fetch(url);
+    const res = await fetch(url, {
+      cache: "no-cache", // 캐시 방지
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
 
     if (!res.ok) {
       throw new Error(`HTTP Error: ${res.status}`);

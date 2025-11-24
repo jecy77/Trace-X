@@ -31,8 +31,16 @@ export default function HomePage() {
     return `${value.slice(0, left)}...${value.slice(-right)}`;
   };
 
-  // 대시보드 상태
-  const [summary, setSummary] = useState<any>(null);
+  // 대시보드 상태 - 기본값으로 안전한 구조 설정
+  const [summary, setSummary] = useState<any>({
+    totalVolume: { value: 0, changeRate: "0" },
+    totalTransactions: { value: 0, changeRate: "0" },
+    highRiskTransactions: { value: 0, changeRate: "0" },
+    warningTransactions: { value: 0, changeRate: "0" },
+    highRiskTransactionTrend: {},
+    highRiskTransactionsByChain: {},
+    averageRiskScore: {},
+  });
 
   // 모니터링 테이블 상태
   const dummyMonitoring = [
@@ -50,9 +58,33 @@ export default function HomePage() {
     async function loadSummary() {
       try {
         const res = await getDashboardSummary();
-        setSummary(res);
+        // 안전 체크: res가 유효한 객체인지 확인
+        if (res && typeof res === "object") {
+          setSummary(res);
+        } else {
+          // 기본값 설정
+          setSummary({
+            totalVolume: { value: 0, changeRate: "0" },
+            totalTransactions: { value: 0, changeRate: "0" },
+            highRiskTransactions: { value: 0, changeRate: "0" },
+            warningTransactions: { value: 0, changeRate: "0" },
+            highRiskTransactionTrend: {},
+            highRiskTransactionsByChain: {},
+            averageRiskScore: {},
+          });
+        }
       } catch (err) {
         console.error("Dashboard summary error:", err);
+        // 에러 발생 시 기본값 설정
+        setSummary({
+          totalVolume: { value: 0, changeRate: "0" },
+          totalTransactions: { value: 0, changeRate: "0" },
+          highRiskTransactions: { value: 0, changeRate: "0" },
+          warningTransactions: { value: 0, changeRate: "0" },
+          highRiskTransactionTrend: {},
+          highRiskTransactionsByChain: {},
+          averageRiskScore: {},
+        });
       }
     }
     loadSummary();
@@ -89,39 +121,93 @@ export default function HomePage() {
       ============================ */}
       <S.ContentSection>
         <S.StatCardContainer>
-          {summary ? (
+          {summary &&
+          summary.totalVolume &&
+          summary.totalVolume.value !== undefined &&
+          summary.totalVolume.value !== null ? (
             <>
               <StatCard
                 title="총 거래량"
-                value={summary.totalVolume.value.toLocaleString()}
-                diff={parseFloat(summary.totalVolume.changeRate)}
-                isUp={summary.totalVolume.changeRate.startsWith("+")}
+                value={String(summary.totalVolume?.value || 0).toLocaleString()}
+                diff={parseFloat(
+                  String(summary.totalVolume?.changeRate || "0")
+                )}
+                isUp={String(summary.totalVolume?.changeRate || "").startsWith(
+                  "+"
+                )}
                 icon={icon_amount}
               />
               <StatCard
                 title="총 거래수"
-                value={summary.totalTransactions.value.toLocaleString()}
-                diff={parseFloat(summary.totalTransactions.changeRate)}
-                isUp={summary.totalTransactions.changeRate.startsWith("+")}
+                value={String(
+                  summary.totalTransactions?.value || 0
+                ).toLocaleString()}
+                diff={parseFloat(
+                  String(summary.totalTransactions?.changeRate || "0")
+                )}
+                isUp={String(
+                  summary.totalTransactions?.changeRate || ""
+                ).startsWith("+")}
                 icon={icon_num}
               />
               <StatCard
                 title="고위험 거래수"
-                value={summary.highRiskTransactions.value.toLocaleString()}
-                diff={parseFloat(summary.highRiskTransactions.changeRate)}
-                isUp={summary.highRiskTransactions.changeRate.startsWith("+")}
+                value={String(
+                  summary.highRiskTransactions?.value || 0
+                ).toLocaleString()}
+                diff={parseFloat(
+                  String(summary.highRiskTransactions?.changeRate || "0")
+                )}
+                isUp={String(
+                  summary.highRiskTransactions?.changeRate || ""
+                ).startsWith("+")}
                 icon={icon_danger}
               />
               <StatCard
                 title="경고 거래수"
-                value={summary.warningTransactions.value.toLocaleString()}
-                diff={parseFloat(summary.warningTransactions.changeRate)}
-                isUp={summary.warningTransactions.changeRate.startsWith("+")}
+                value={String(
+                  summary.warningTransactions?.value || 0
+                ).toLocaleString()}
+                diff={parseFloat(
+                  String(summary.warningTransactions?.changeRate || "0")
+                )}
+                isUp={String(
+                  summary.warningTransactions?.changeRate || ""
+                ).startsWith("+")}
                 icon={icon_warning}
               />
             </>
           ) : (
-            <>로딩중...</>
+            <>
+              <StatCard
+                title="총 거래량"
+                value="0"
+                diff={0}
+                isUp={false}
+                icon={icon_amount}
+              />
+              <StatCard
+                title="총 거래수"
+                value="0"
+                diff={0}
+                isUp={false}
+                icon={icon_num}
+              />
+              <StatCard
+                title="고위험 거래수"
+                value="0"
+                diff={0}
+                isUp={false}
+                icon={icon_danger}
+              />
+              <StatCard
+                title="경고 거래수"
+                value="0"
+                diff={0}
+                isUp={false}
+                icon={icon_warning}
+              />
+            </>
           )}
         </S.StatCardContainer>
 
@@ -151,13 +237,14 @@ export default function HomePage() {
 
               <S.RiskValueRow>
                 <S.RiskValue>
-                  {summary
+                  {summary && summary.averageRiskScore
                     ? (() => {
                         const arr = Object.values(
                           summary.averageRiskScore
                         ) as number[];
+                        if (arr.length === 0) return "3.2";
                         const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-                        return avg.toFixed(2);
+                        return isNaN(avg) ? "3.2" : avg.toFixed(2);
                       })()
                     : "3.2"}
                 </S.RiskValue>

@@ -8,13 +8,21 @@ import CasePage from "./pages/case";
 import AdhocSearchPage from "./pages/adhoc";
 import AdhocResultPage from "./pages/adhoc/result";
 import AdhocLayout from "./layouts/AdhocLayout";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 function App() {
   return (
-    <>
+    <ErrorBoundary>
       <Routes>
         <Route element={<MainLayout />}>
-          <Route index element={<HomePage />} />
+          <Route
+            index
+            element={
+              <ErrorBoundary>
+                <HomePage />
+              </ErrorBoundary>
+            }
+          />
           <Route path="live-detection" element={<LivePage />} />
           <Route path="adhoc" element={<AdhocLayout />}>
             <Route index element={<AdhocSearchPage />} />
@@ -25,7 +33,7 @@ function App() {
         </Route>
         <Route path="demo" element={<DemoPage />} />
       </Routes>
-    </>
+    </ErrorBoundary>
   );
 }
 

@@ -44,28 +44,50 @@ export const getDashboardSummary = async (chainId?: string) => {
       }
     );
 
-    return res.data.data;
+    // 안전 체크: data가 없거나 필수 필드가 없으면 기본값 반환
+    if (!res.data?.data) {
+      return {
+        totalVolume: { value: 0, changeRate: "0" },
+        totalTransactions: { value: 0, changeRate: "0" },
+        highRiskTransactions: { value: 0, changeRate: "0" },
+        warningTransactions: { value: 0, changeRate: "0" },
+        highRiskTransactionTrend: {},
+        highRiskTransactionsByChain: {},
+        averageRiskScore: {},
+      };
+    }
+
+    // 추가 안전 체크: 각 필드가 올바른 구조인지 확인
+    const data = res.data.data;
+    return {
+      totalVolume: data?.totalVolume || { value: 0, changeRate: "0" },
+      totalTransactions: data?.totalTransactions || {
+        value: 0,
+        changeRate: "0",
+      },
+      highRiskTransactions: data?.highRiskTransactions || {
+        value: 0,
+        changeRate: "0",
+      },
+      warningTransactions: data?.warningTransactions || {
+        value: 0,
+        changeRate: "0",
+      },
+      highRiskTransactionTrend: data?.highRiskTransactionTrend || {},
+      highRiskTransactionsByChain: data?.highRiskTransactionsByChain || {},
+      averageRiskScore: data?.averageRiskScore || {},
+    };
   } catch (error: any) {
-    // 서버 응답 오류
-    if (error.response) {
-      console.error(
-        "[Dashboard API Error] 서버 응답 오류:",
-        error.response.status,
-        error.response.data
-      );
-      throw new Error(
-        error.response.data?.message ?? `서버 오류 (${error.response.status})`
-      );
-    }
-
-    // 응답 없음
-    if (error.request) {
-      console.error("[Dashboard API Error] 응답 없음:", error.request);
-      throw new Error("서버가 응답하지 않습니다.");
-    }
-
-    // 기타 오류
-    console.error("[Dashboard API Error] 기타 오류:", error.message);
-    throw new Error("예기치 못한 오류가 발생했습니다.");
+    // 에러 발생 시 기본값 반환 (에러를 throw하지 않음)
+    console.error("[Dashboard API Error]:", error);
+    return {
+      totalVolume: { value: 0, changeRate: "0" },
+      totalTransactions: { value: 0, changeRate: "0" },
+      highRiskTransactions: { value: 0, changeRate: "0" },
+      warningTransactions: { value: 0, changeRate: "0" },
+      highRiskTransactionTrend: {},
+      highRiskTransactionsByChain: {},
+      averageRiskScore: {},
+    };
   }
 };

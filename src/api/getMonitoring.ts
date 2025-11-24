@@ -15,7 +15,8 @@ export type MonitoringResponse = {
 
 export async function getMonitoring() {
   try {
-    const backendUrl = import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
+    const backendUrl =
+      import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
     const res = await axios.get<MonitoringResponse>(
       `${backendUrl}/api/dashboard/monitoring`
     );
