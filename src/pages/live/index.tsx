@@ -114,8 +114,9 @@ export default function LivePage() {
           json.data?.map((item: BackendTx) => mapBackendToTxData(item)) ?? [];
 
         if (isMounted) setData(mapped);
-      } catch (e) {
+      } catch (error) {
         if (isMounted) setData([]);
+        console.log("Error fetching live data:", error);
       } finally {
         if (isMounted) setLoading(false);
       }
