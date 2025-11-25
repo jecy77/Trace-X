@@ -13,7 +13,7 @@ export async function getFundFlow(
       cache: "no-cache", // 캐시 방지
       headers: {
         "Cache-Control": "no-cache",
-        Pragma: "no-cache",
+        // Pragma 헤더 제거 - CORS 문제 해결
       },
     });
 
@@ -39,20 +39,22 @@ export async function getFundFlow(
       }
       // nodes가 없어도 edges가 있으면 데이터가 있다고 판단
       if (json.data.edges && json.data.edges.length > 0) {
-        console.warn("getFundFlow: nodes가 없지만 edges가 있습니다. nodes를 생성합니다.");
+        console.warn(
+          "getFundFlow: nodes가 없지만 edges가 있습니다. nodes를 생성합니다."
+        );
         // edges에서 nodes 추출
         const nodeSet = new Set<string>();
         json.data.edges.forEach((edge: any) => {
           if (edge.from_address) nodeSet.add(edge.from_address.toLowerCase());
           if (edge.to_address) nodeSet.add(edge.to_address.toLowerCase());
         });
-        
+
         // nodes 생성
-        json.data.nodes = Array.from(nodeSet).map(addr => ({
+        json.data.nodes = Array.from(nodeSet).map((addr) => ({
           id: `${chainId}-${addr}`,
           address: addr,
           chain_id: chainId,
-          label: addr.slice(0, 6) + '...' + addr.slice(-4)
+          label: addr.slice(0, 6) + "..." + addr.slice(-4),
         }));
         return json.data;
       }
