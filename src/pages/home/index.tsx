@@ -31,7 +31,23 @@ export default function HomePage() {
     return `${value.slice(0, left)}...${value.slice(-right)}`;
   };
 
-  // 대시보드 상태 - 기본값으로 안전한 구조 설정
+  // 숫자를 안전하게 변환하는 함수
+  const toNumber = (v: any) => {
+    const n = Number(v);
+    return isNaN(n) ? 0 : n;
+  };
+
+  // 기본값
+  const emptySummary = {
+    totalVolume: { value: 0, changeRate: "0" },
+    totalTransactions: { value: 0, changeRate: "0" },
+    highRiskTransactions: { value: 0, changeRate: "0" },
+    warningTransactions: { value: 0, changeRate: "0" },
+    highRiskTransactionTrend: {},
+    highRiskTransactionsByChain: {},
+    averageRiskScore: {},
+  };
+
   const [summary, setSummary] = useState<any>({
     totalVolume: { value: 0, changeRate: "0" },
     totalTransactions: { value: 0, changeRate: "0" },
@@ -42,7 +58,7 @@ export default function HomePage() {
     averageRiskScore: {},
   });
 
-  // 모니터링 테이블 상태
+  // ---- 모니터링 ----
   const dummyMonitoring = [
     { txHash: "#1532", timestamp: "Dec 30, 10:06 AM", value: "$329.40" },
     { txHash: "#1531", timestamp: "Dec 29, 2:59 AM", value: "$117.24" },
@@ -58,33 +74,14 @@ export default function HomePage() {
     async function loadSummary() {
       try {
         const res = await getDashboardSummary();
-        // 안전 체크: res가 유효한 객체인지 확인
         if (res && typeof res === "object") {
           setSummary(res);
         } else {
-          // 기본값 설정
-          setSummary({
-            totalVolume: { value: 0, changeRate: "0" },
-            totalTransactions: { value: 0, changeRate: "0" },
-            highRiskTransactions: { value: 0, changeRate: "0" },
-            warningTransactions: { value: 0, changeRate: "0" },
-            highRiskTransactionTrend: {},
-            highRiskTransactionsByChain: {},
-            averageRiskScore: {},
-          });
+          setSummary(emptySummary);
         }
       } catch (err) {
         console.error("Dashboard summary error:", err);
-        // 에러 발생 시 기본값 설정
-        setSummary({
-          totalVolume: { value: 0, changeRate: "0" },
-          totalTransactions: { value: 0, changeRate: "0" },
-          highRiskTransactions: { value: 0, changeRate: "0" },
-          warningTransactions: { value: 0, changeRate: "0" },
-          highRiskTransactionTrend: {},
-          highRiskTransactionsByChain: {},
-          averageRiskScore: {},
-        });
+        setSummary(emptySummary);
       }
     }
     loadSummary();
@@ -121,104 +118,46 @@ export default function HomePage() {
       ============================ */}
       <S.ContentSection>
         <S.StatCardContainer>
-          {summary &&
-          summary.totalVolume &&
-          summary.totalVolume.value !== undefined &&
-          summary.totalVolume.value !== null ? (
-            <>
-              <StatCard
-                title="총 거래량"
-                value={String(summary.totalVolume?.value || 0).toLocaleString()}
-                diff={parseFloat(
-                  String(summary.totalVolume?.changeRate || "0")
-                )}
-                isUp={String(summary.totalVolume?.changeRate || "").startsWith(
-                  "+"
-                )}
-                icon={icon_amount}
-              />
-              <StatCard
-                title="총 거래수"
-                value={String(
-                  summary.totalTransactions?.value || 0
-                ).toLocaleString()}
-                diff={parseFloat(
-                  String(summary.totalTransactions?.changeRate || "0")
-                )}
-                isUp={String(
-                  summary.totalTransactions?.changeRate || ""
-                ).startsWith("+")}
-                icon={icon_num}
-              />
-              <StatCard
-                title="고위험 거래수"
-                value={String(
-                  summary.highRiskTransactions?.value || 0
-                ).toLocaleString()}
-                diff={parseFloat(
-                  String(summary.highRiskTransactions?.changeRate || "0")
-                )}
-                isUp={String(
-                  summary.highRiskTransactions?.changeRate || ""
-                ).startsWith("+")}
-                icon={icon_danger}
-              />
-              <StatCard
-                title="경고 거래수"
-                value={String(
-                  summary.warningTransactions?.value || 0
-                ).toLocaleString()}
-                diff={parseFloat(
-                  String(summary.warningTransactions?.changeRate || "0")
-                )}
-                isUp={String(
-                  summary.warningTransactions?.changeRate || ""
-                ).startsWith("+")}
-                icon={icon_warning}
-              />
-            </>
-          ) : (
-            <>
-              <StatCard
-                title="총 거래량"
-                value="0"
-                diff={0}
-                isUp={false}
-                icon={icon_amount}
-              />
-              <StatCard
-                title="총 거래수"
-                value="0"
-                diff={0}
-                isUp={false}
-                icon={icon_num}
-              />
-              <StatCard
-                title="고위험 거래수"
-                value="0"
-                diff={0}
-                isUp={false}
-                icon={icon_danger}
-              />
-              <StatCard
-                title="경고 거래수"
-                value="0"
-                diff={0}
-                isUp={false}
-                icon={icon_warning}
-              />
-            </>
-          )}
+          <>
+            <StatCard
+              title="총 거래량"
+              value={String(summary.totalVolume?.value || 0).toLocaleString()}
+              diff={toNumber(summary.totalVolume?.changeRate)}
+              icon={icon_amount}
+            />
+            <StatCard
+              title="총 거래수"
+              value={String(
+                summary.totalTransactions?.value || 0
+              ).toLocaleString()}
+              diff={toNumber(summary.totalTransactions?.changeRate)}
+              icon={icon_num}
+            />
+            <StatCard
+              title="고위험 거래수"
+              value={String(
+                summary.highRiskTransactions?.value || 0
+              ).toLocaleString()}
+              diff={toNumber(summary.highRiskTransactions?.changeRate)}
+              icon={icon_danger}
+            />
+            <StatCard
+              title="경고 거래수"
+              value={String(
+                summary.warningTransactions?.value || 0
+              ).toLocaleString()}
+              diff={toNumber(summary.warningTransactions?.changeRate)}
+              icon={icon_warning}
+            />
+          </>
         </S.StatCardContainer>
 
         {/* ============================
             MAIN GRAPHS
         ============================ */}
         <S.MainContainer>
-          {/* 왼쪽: 고위험 거래 추이 */}
           <HighRiskChart data={summary?.highRiskTransactionTrend} />
 
-          {/* 오른쪽 패널 */}
           <S.RightPanel>
             <S.RightTop>
               <S.RightHeader>
@@ -271,7 +210,6 @@ export default function HomePage() {
       </S.HeaderSection>
 
       <S.AnomalySection>
-        {/* 왼쪽: 패턴 */}
         <S.AnomalyLeft>
           <S.AnomalyCard>
             <S.AnomalyHeader>
@@ -306,7 +244,6 @@ export default function HomePage() {
           </S.AnomalyCard>
         </S.AnomalyLeft>
 
-        {/* 오른쪽: 최근 고액 거래 */}
         <S.AnomalyRight>
           <S.AnomalyCard>
             <S.AnomalyHeader>
@@ -334,7 +271,6 @@ export default function HomePage() {
                     }
                   >
                     <td title={item.txHash}>{shorten(item.txHash)}</td>
-
                     <td>{item.timestamp}</td>
                     <td>{item.value}</td>
                   </S.TableRow>

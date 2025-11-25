@@ -5,18 +5,15 @@ import ArrowDown from "@/assets/icon_arrow_down.svg";
 type StatCardProps = {
   title: string;
   value: string | number;
-  diff: number; // 증감률
-  isUp: boolean; // 증가(true)/감소(false)
+  diff: number;
   icon: string;
 };
 
-export default function StatCard({
-  title,
-  value,
-  diff,
-  isUp,
-  icon,
-}: StatCardProps) {
+export default function StatCard({ title, value, diff, icon }: StatCardProps) {
+  // diff 기준으로 상태 정의
+  const status: "up" | "down" | "neutral" =
+    diff > 0 ? "up" : diff < 0 ? "down" : "neutral";
+
   return (
     <Card>
       <Header>
@@ -26,12 +23,16 @@ export default function StatCard({
 
       <Body>
         <Value>{value}</Value>
-        <Diff $isUp={isUp}>
+
+        <Diff $status={status}>
           <div>{diff}%</div>
-          <ArrowIcon
-            src={isUp ? ArrowUp : ArrowDown}
-            alt={isUp ? "상승" : "하락"}
-          />
+
+          {status !== "neutral" && (
+            <ArrowIcon
+              src={status === "up" ? ArrowUp : ArrowDown}
+              alt={status === "up" ? "상승" : "하락"}
+            />
+          )}
         </Diff>
       </Body>
     </Card>
@@ -87,7 +88,12 @@ const Value = styled.div`
   line-height: 32px;
 `;
 
-const Diff = styled.div<{ $isUp: boolean }>`
+const ArrowIcon = styled.img`
+  width: 8px;
+  height: 8px;
+`;
+
+const Diff = styled.div<{ $status: "up" | "down" | "neutral" }>`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -96,23 +102,29 @@ const Diff = styled.div<{ $isUp: boolean }>`
 
   font-family: "Mona Sans";
   font-size: 11px;
-  font-style: normal;
-  font-weight: 300;
   line-height: 14px;
-  color: ${({ $isUp }) =>
-    $isUp ? "var(--red300, #FF5A65)" : "var(--skyblue300, #00D4FF)"};
-  background-color: ${({ $isUp }) =>
-    $isUp
-      ? "var(--red20, rgba(255, 90, 101, 0.20))"
-      : " var(--skyblue20, rgba(0, 212, 255, 0.20))"};
-  border: ${({ $isUp }) =>
-    $isUp
-      ? "1px solid var(--red20, rgba(255, 90, 101, 0.20))"
-      : "1px solid var(--skyblue20, rgba(0, 212, 255, 0.20))"};
-  border-radius: 2px;
-`;
+  font-weight: 300;
 
-const ArrowIcon = styled.img`
-  width: 8px;
-  height: 8px;
+  color: ${({ $status }) =>
+    $status === "up"
+      ? "var(--red300, #FF5A65)"
+      : $status === "down"
+      ? "var(--skyblue300, #00D4FF)"
+      : "var(--neutral300, #AEB9E1)"};
+
+  background-color: ${({ $status }) =>
+    $status === "up"
+      ? "rgba(255, 90, 101, 0.20)"
+      : $status === "down"
+      ? "rgba(0, 212, 255, 0.20)"
+      : "rgba(255,255,255,0.08)"};
+
+  border: ${({ $status }) =>
+    $status === "up"
+      ? "1px solid rgba(255, 90, 101, 0.20)"
+      : $status === "down"
+      ? "1px solid rgba(0, 212, 255, 0.20)"
+      : "1px solid rgba(255,255,255,0.08)"};
+
+  border-radius: 2px;
 `;
