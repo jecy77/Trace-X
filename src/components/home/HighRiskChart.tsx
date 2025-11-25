@@ -45,7 +45,7 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
     data && typeof data === "object" && Object.keys(data).length > 0;
 
   /** 백엔드 데이터를 nivo 형식으로 변환 */
-  let trendData = [];
+  let trendData: { x: string; y: number }[] = [];
 
   if (isValidData) {
     trendData = Object.entries(data)

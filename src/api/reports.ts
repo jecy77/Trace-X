@@ -1,4 +1,4 @@
-import axiosInstance from "./axiosInstance";
+import { api as axiosInstance } from "./axiosInstance";
 
 export interface SuspiciousReport {
   id?: number;
