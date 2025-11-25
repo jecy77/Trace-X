@@ -27,8 +27,9 @@ export interface BackendRiskScoringRequest {
 export async function analyzeAddressViaBackend(
   request: BackendRiskScoringRequest
 ): Promise<AddressAnalysisResponse> {
+  // 백엔드 API를 통해 리스크 스코어링 (백엔드가 리스크 스코어링 API를 프록시)
   const response = await fetch(
-    `${RISK_SCORING_API_URL}/api/analysis/risk-scoring`,
+    `${BACKEND_API_URL}/api/analysis/risk-scoring`,
     {
       method: "POST",
       headers: {
