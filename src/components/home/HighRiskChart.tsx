@@ -40,29 +40,41 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
     { x: "Dec", y: 15 },
   ];
 
+  /** 데이터가 유효한지 검사 */
+  const isValidData =
+    data && typeof data === "object" && Object.keys(data).length > 0;
+
   /** 백엔드 데이터를 nivo 형식으로 변환 */
-  const trendData = data
-    ? Object.entries(data)
-        .map(([ym, value]) => {
-          const [, month] = ym.split("-");
-          return {
-            x: monthMap[Number(month) - 1], // "2025-03" → "Mar"
-            y: value,
-          };
-        })
-        .sort((a, b) => {
-          const aIdx = monthMap.indexOf(a.x);
-          const bIdx = monthMap.indexOf(b.x);
-          return aIdx - bIdx;
-        })
-    : fallbackDummy;
+  let trendData = [];
+
+  if (isValidData) {
+    trendData = Object.entries(data)
+      .map(([ym, value]) => {
+        const parts = ym.split("-");
+        const month = Number(parts[1]);
+
+        if (!month || !value) return null; // 잘못된 데이터 → 제외
+
+        return {
+          x: monthMap[month - 1], // "2025-03" → "Mar"
+          y: value,
+        };
+      })
+      .filter(Boolean) as { x: string; y: number }[];
+
+    // 월 순서대로 정렬
+    trendData.sort((a, b) => monthMap.indexOf(a.x) - monthMap.indexOf(b.x));
+  }
+
+  /** trendData가 비어있으면 더미 사용 */
+  const finalTrendData = trendData.length > 0 ? trendData : fallbackDummy;
 
   /** nivo data 구조 */
   const chartData = [
     {
       id: "고위험",
       color: "#D42649",
-      data: trendData,
+      data: finalTrendData,
     },
   ];
 
@@ -118,12 +130,10 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
                   fontSize: "13px",
                 }}
               >
-                {/* 월 */}
                 <div style={{ marginBottom: 6, fontWeight: 500 }}>
                   {high.data.x}
                 </div>
 
-                {/* 값만 표시 */}
                 <div
                   style={{
                     display: "flex",

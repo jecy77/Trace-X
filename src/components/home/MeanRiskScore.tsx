@@ -5,45 +5,81 @@ interface MeanRiskScoreProps {
 }
 
 export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
-  // 00 → "12 AM", 14 → "2 PM"
+  // HH → "2PM" 변환
   function formatHour(hh: number) {
     const hour = hh % 24;
     const isPM = hour >= 12;
-
-    const displayHour =
+    const display =
       hour === 0 ? 12 : hour === 12 ? 12 : hour > 12 ? hour - 12 : hour;
 
-    return `${displayHour}${isPM ? "PM" : "AM"}`; // ← 공백 제거!
+    return `${display}${isPM ? "PM" : "AM"}`;
   }
 
-  // backend → nivo
+  // -------------------------------
+  // 더미 데이터 (fallback)
+  // -------------------------------
+  const fallback = [
+    { x: 0, y: 2.1, xFormatted: "12AM", yFormatted: "2.1" },
+    { x: 2, y: 2.5, xFormatted: "2AM", yFormatted: "2.5" },
+    { x: 4, y: 1.8, xFormatted: "4AM", yFormatted: "1.8" },
+    { x: 6, y: 2.2, xFormatted: "6AM", yFormatted: "2.2" },
+    { x: 8, y: 1.9, xFormatted: "8AM", yFormatted: "1.9" },
+    { x: 10, y: 2.3, xFormatted: "10AM", yFormatted: "2.3" },
+    { x: 12, y: 3.4, xFormatted: "12PM", yFormatted: "3.4" },
+    { x: 14, y: 2.8, xFormatted: "2PM", yFormatted: "2.8" },
+    { x: 16, y: 3.9, xFormatted: "4PM", yFormatted: "3.9" },
+    { x: 18, y: 2.7, xFormatted: "6PM", yFormatted: "2.7" },
+    { x: 20, y: 3.2, xFormatted: "8PM", yFormatted: "3.2" },
+    { x: 22, y: 2.4, xFormatted: "10PM", yFormatted: "2.4" },
+  ];
+
+  // -------------------------------
+  // data 유효성 검사 + 변환
+  // -------------------------------
+  const isValid =
+    data &&
+    Object.keys(data).length > 0 &&
+    Object.values(data).some((v) => typeof v === "number");
+
+  let converted: {
+    x: number;
+    y: number;
+    xFormatted: string;
+    yFormatted: string;
+  }[] = [];
+
+  if (isValid) {
+    converted = Object.entries(data!)
+      .map(([hourStr, score]) => {
+        const hour = Number(hourStr);
+
+        // 숫자가 아니면 제외
+        if (isNaN(hour)) return null;
+
+        return {
+          x: hour,
+          y: score,
+          xFormatted: formatHour(hour),
+          yFormatted: String(score),
+        };
+      })
+      .filter(Boolean) as any[];
+
+    // 정렬
+    converted.sort((a, b) => a.x - b.x);
+  }
+
+  // -------------------------------
+  // 최종 데이터 (비정상이면 fallback)
+  // -------------------------------
+  const finalData = converted.length > 0 ? converted : fallback;
+
+  // nivo 구조
   const chartData = [
     {
       id: "Mean Risk Score",
       color: "#D42649",
-      data: data
-        ? Object.entries(data)
-            .map(([hh, score]) => ({
-              x: Number(hh), // 정렬용 숫자
-              y: score,
-              xFormatted: formatHour(Number(hh)),
-              yFormatted: score.toString(),
-            }))
-            .sort((a, b) => a.x - b.x) // 시간 순 정렬
-        : [
-            { x: 0, y: 2.1, xFormatted: "12AM", yFormatted: "2.1" },
-            { x: 2, y: 2.5, xFormatted: "2AM", yFormatted: "2.5" },
-            { x: 4, y: 1.8, xFormatted: "4AM", yFormatted: "1.8" },
-            { x: 6, y: 2.2, xFormatted: "6AM", yFormatted: "2.2" },
-            { x: 8, y: 1.9, xFormatted: "8AM", yFormatted: "1.9" },
-            { x: 10, y: 2.3, xFormatted: "10AM", yFormatted: "2.3" },
-            { x: 12, y: 3.4, xFormatted: "12PM", yFormatted: "3.4" },
-            { x: 14, y: 2.8, xFormatted: "2PM", yFormatted: "2.8" },
-            { x: 16, y: 3.9, xFormatted: "4PM", yFormatted: "3.9" },
-            { x: 18, y: 2.7, xFormatted: "6PM", yFormatted: "2.7" },
-            { x: 20, y: 3.2, xFormatted: "8PM", yFormatted: "3.2" },
-            { x: 22, y: 2.4, xFormatted: "10PM", yFormatted: "2.4" },
-          ],
+      data: finalData,
     },
   ];
 
@@ -90,7 +126,6 @@ export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
               color: "#fff",
               fontFamily: "Pretendard",
               fontSize: 12,
-              boxShadow: "0 2px 6px rgba(0,0,0,0.25)",
             },
           },
         }}

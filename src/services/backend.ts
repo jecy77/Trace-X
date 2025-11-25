@@ -4,6 +4,9 @@ import type { AddressAnalysisResponse } from "@/types/api";
 const BACKEND_API_URL =
   import.meta.env.VITE_BACKEND_API_URL || "http://localhost:8888";
 
+const RISK_SCORING_API_URL =
+  import.meta.env.VITE_RISK_SCORING_API_URL || "http://localhost:5001";
+
 export interface BackendRiskScoringRequest {
   address: string;
   chain_id: number;
@@ -24,13 +27,16 @@ export interface BackendRiskScoringRequest {
 export async function analyzeAddressViaBackend(
   request: BackendRiskScoringRequest
 ): Promise<AddressAnalysisResponse> {
-  const response = await fetch(`${BACKEND_API_URL}/api/analysis/risk-scoring`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(request),
-  });
+  const response = await fetch(
+    `${RISK_SCORING_API_URL}/api/analysis/risk-scoring`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(request),
+    }
+  );
 
   if (!response.ok) {
     const error = await response

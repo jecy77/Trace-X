@@ -25,9 +25,11 @@ export default function HighRiskByEachChain({
       ...chains,
     }));
   }
+  // data가 비어있거나 잘못된 구조면 더미데이터 사용
+  const isEmptyData = !data || Object.keys(data).length === 0;
 
   // 데이터가 없으면 더미 데이터 사용
-  const chartData = data
+  const chartData = !isEmptyData
     ? transformChainData(data)
     : [
         {

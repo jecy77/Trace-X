@@ -47,12 +47,12 @@ export const ModeSelector = styled.div`
 export const ModeButton = styled.button<{ $active: boolean }>`
   padding: 10px 20px;
   background: ${(props) =>
-    props.$active ? "var(--red300, #FF5A65)" : "var(--neutral800, #060a1d)"};
+    props.$active ? "var(--red300, #1e1e1e)" : "var(--neutral800, #060a1d)"};
   color: var(--white, #fff);
   border: 1px solid
     ${(props) =>
       props.$active
-        ? "var(--red300, #FF5A65)"
+        ? "var(--red300, #1e1e1e)"
         : "var(--secondary200, #343b4f)"};
   border-radius: 8px;
   font-size: 14px;
@@ -63,10 +63,10 @@ export const ModeButton = styled.button<{ $active: boolean }>`
 
   &:hover {
     background: ${(props) =>
-      props.$active ? "#FF6B7F" : "var(--secondary200, #343b4f)"};
+      props.$active ? "#1e1e1e" : "var(--secondary200, #343b4f)"};
     border-color: ${(props) =>
       props.$active
-        ? "var(--red300, #FF5A65)"
+        ? "var(--red300, #1e1e1e)"
         : "var(--secondary200, #343b4f)"};
   }
 `;

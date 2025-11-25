@@ -52,7 +52,7 @@ export default function HomePage() {
   const [monitoring, setMonitoring] = useState(dummyMonitoring);
 
   /* -----------------------------------------------
-      📌 대시보드 요약 데이터 호출
+      대시보드 요약 데이터 호출
   ------------------------------------------------- */
   useEffect(() => {
     async function loadSummary() {
@@ -91,7 +91,7 @@ export default function HomePage() {
   }, []);
 
   /* -----------------------------------------------
-      📌 최근 고액 거래
+      최근 고액 거래
   ------------------------------------------------- */
   useEffect(() => {
     async function loadMonitoring() {
