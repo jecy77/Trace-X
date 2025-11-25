@@ -28,16 +28,13 @@ export async function analyzeAddressViaBackend(
   request: BackendRiskScoringRequest
 ): Promise<AddressAnalysisResponse> {
   // 백엔드 API를 통해 리스크 스코어링 (백엔드가 리스크 스코어링 API를 프록시)
-  const response = await fetch(
-    `${BACKEND_API_URL}/api/analysis/risk-scoring`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(request),
-    }
-  );
+  const response = await fetch(`${BACKEND_API_URL}/api/analysis/risk-scoring`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(request),
+  });
 
   if (!response.ok) {
     const error = await response
