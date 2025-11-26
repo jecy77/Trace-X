@@ -16,7 +16,7 @@ export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
   }
 
   // -------------------------------
-  // 더미 데이터 (fallback)
+  // fallback dummy
   // -------------------------------
   const fallback = [
     { x: 0, y: 2.1, xFormatted: "12AM", yFormatted: "2.1" },
@@ -32,6 +32,19 @@ export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
     { x: 20, y: 3.2, xFormatted: "8PM", yFormatted: "3.2" },
     { x: 22, y: 2.4, xFormatted: "10PM", yFormatted: "2.4" },
   ];
+
+  // -------------------------------
+  // 타입 가드 선언
+  // -------------------------------
+  const isValidItem = (
+    item: any
+  ): item is { x: number; y: number; xFormatted: string; yFormatted: string } =>
+    item &&
+    typeof item === "object" &&
+    typeof item.x === "number" &&
+    typeof item.y === "number" &&
+    typeof item.xFormatted === "string" &&
+    typeof item.yFormatted === "string";
 
   // -------------------------------
   // data 유효성 검사 + 변환
@@ -52,9 +65,8 @@ export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
     converted = Object.entries(data!)
       .map(([hourStr, score]) => {
         const hour = Number(hourStr);
-
-        // 숫자가 아니면 제외
         if (isNaN(hour)) return null;
+        if (typeof score !== "number") return null;
 
         return {
           x: hour,
@@ -63,18 +75,17 @@ export default function MeanRiskScore({ data }: MeanRiskScoreProps) {
           yFormatted: String(score),
         };
       })
-      .filter(Boolean) as any[];
+      .filter(isValidItem); // << 타입 가드로 null 제거 완전 인정됨
 
     // 정렬
     converted.sort((a, b) => a.x - b.x);
   }
 
   // -------------------------------
-  // 최종 데이터 (비정상이면 fallback)
+  // 최종 데이터 선택
   // -------------------------------
   const finalData = converted.length > 0 ? converted : fallback;
 
-  // nivo 구조
   const chartData = [
     {
       id: "Mean Risk Score",

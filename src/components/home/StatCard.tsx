@@ -5,14 +5,23 @@ import ArrowDown from "@/assets/icon_arrow_down.svg";
 type StatCardProps = {
   title: string;
   value: string | number;
-  diff: number;
+  diff: string | number;
   icon: string;
 };
 
 export default function StatCard({ title, value, diff, icon }: StatCardProps) {
-  // diff 기준으로 상태 정의
+  // 문자열 → 숫자로 변환 ("-4.5%" → -4.5)
+  const diffNumber =
+    typeof diff === "string" ? Number(diff.replace("%", "")) : diff;
+
   const status: "up" | "down" | "neutral" =
-    diff > 0 ? "up" : diff < 0 ? "down" : "neutral";
+    diffNumber > 0 ? "up" : diffNumber < 0 ? "down" : "neutral";
+
+  // 숫자일 경우 3자리 콤마 적용
+  const formattedValue =
+    typeof value === "number"
+      ? value.toLocaleString(undefined, { maximumFractionDigits: 1 })
+      : value;
 
   return (
     <Card>
@@ -22,10 +31,10 @@ export default function StatCard({ title, value, diff, icon }: StatCardProps) {
       </Header>
 
       <Body>
-        <Value>{value}</Value>
+        <Value>{formattedValue}</Value>
 
         <Diff $status={status}>
-          <div>{diff}%</div>
+          <div>{diffNumber}%</div>
 
           {status !== "neutral" && (
             <ArrowIcon
@@ -38,6 +47,7 @@ export default function StatCard({ title, value, diff, icon }: StatCardProps) {
     </Card>
   );
 }
+
 
 // ---------- styled ----------
 const Card = styled.div`

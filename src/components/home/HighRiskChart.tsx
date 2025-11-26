@@ -48,19 +48,21 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
   let trendData: { x: string; y: number }[] = [];
 
   if (isValidData) {
-    trendData = Object.entries(data)
-      .map(([ym, value]) => {
-        const parts = ym.split("-");
-        const month = Number(parts[1]);
+      trendData = Object.entries(data)
+        .map(([ym, value]) => {
+          const parts = ym.split("-");
+          const month = Number(parts[1]);
 
-        if (!month || !value) return null; // 잘못된 데이터 → 제외
+          // value가 0이어도 유효 → 삭제하면 안 됨!!
+          if (!month || typeof value !== "number") return null;
 
-        return {
-          x: monthMap[month - 1], // "2025-03" → "Mar"
-          y: value,
-        };
-      })
-      .filter(Boolean) as { x: string; y: number }[];
+          return {
+            x: monthMap[month - 1],
+            y: value,
+          };
+        })
+        .filter(Boolean) as { x: string; y: number }[];
+
 
     // 월 순서대로 정렬
     trendData.sort((a, b) => monthMap.indexOf(a.x) - monthMap.indexOf(b.x));
@@ -95,7 +97,7 @@ export default function HighRiskChart({ data }: HighRiskChartProps) {
         <ResponsiveLine
           data={chartData}
           colors={(d) => d.color}
-          margin={{ top: 30, right: 40, bottom: 50, left: 50 }}
+          margin={{ top: 30, right: 40, bottom: 50, left: 70 }}
           xScale={{ type: "point" }}
           yScale={{ type: "linear", min: 0, max: "auto" }}
           curve="monotoneX"

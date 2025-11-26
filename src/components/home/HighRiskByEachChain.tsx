@@ -12,12 +12,12 @@ export default function HighRiskByEachChain({
   // 백엔드 → 차트 데이터 변환
   function transformChainData(raw: Record<string, Record<string, number>>) {
     const monthMap: Record<string, string> = {
-      "1~2월": "Jan–Feb",
-      "3~4월": "Mar–Apr",
-      "5~6월": "May–Jun",
-      "7~8월": "Jul–Aug",
-      "9~10월": "Sep–Oct",
-      "11~12월": "Nov–Dec",
+      "1~2월": "1–2",
+      "3~4월": "3–4",
+      "5~6월": "5–6",
+      "7~8월": "7–8",
+      "9~10월": "9–10",
+      "11~12월": "11–12",
     };
 
     return Object.entries(raw).map(([period, chains]) => ({

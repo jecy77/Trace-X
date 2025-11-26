@@ -663,7 +663,7 @@ export default function AdhocPage() {
       {/* 검색 영역 */}
       <S.SearchSection>
         {/* 분석 모드 선택 */}
-        <S.ModeSelector>
+        {/* <S.ModeSelector>
           <S.ModeButton
             $active={analysisMode === "address"}
             onClick={() => setAnalysisMode("address")}
@@ -676,7 +676,7 @@ export default function AdhocPage() {
           >
             트랜잭션 분석
           </S.ModeButton>
-        </S.ModeSelector>
+        </S.ModeSelector> */}
 
         {/* 체인 선택 + 검색바 + 분석 버튼 */}
         <div

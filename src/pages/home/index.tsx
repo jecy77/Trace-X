@@ -31,11 +31,19 @@ export default function HomePage() {
     return `${value.slice(0, left)}...${value.slice(-right)}`;
   };
 
-  // 숫자를 안전하게 변환하는 함수
+  // 숫자를 안전하게 변환하는 함수 (%, 공백 포함 문자열 대응)
   const toNumber = (v: any) => {
-    const n = Number(v);
-    return isNaN(n) ? 0 : n;
+    if (typeof v === "number") return v;
+
+    if (typeof v === "string") {
+      const cleaned = v.replace("%", "").trim(); // "-4.5%" → "-4.5"
+      const n = Number(cleaned);
+      return isNaN(n) ? 0 : n;
+    }
+
+    return 0;
   };
+
 
   // 기본값
   const emptySummary = {
