@@ -3,9 +3,14 @@ import styled from "styled-components";
 export const Root = styled.div`
   padding: 18px 50px;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
 `;
 
 export const HeaderSection = styled.div`
+  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -34,6 +39,9 @@ export const ContentSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 30px;
+  flex: 1;
+  min-height: 0;           /* 중요: 내부에서 overflow 잘 동작하게 */
+  overflow-y: auto;  
 `;
 
 export const FormCard = styled.div`

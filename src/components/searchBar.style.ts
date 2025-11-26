@@ -8,8 +8,8 @@ export const Container = styled.div`
 export const InputWrapper = styled.div`
   display: flex;
   align-items: center;
-  background: #111827;
-  border: 1px solid #1f2937;
+  background: #1e1e1e;
+  border: 1px solid #444;
   border-radius: 12px;
   padding: 6px;
   gap: 6px;

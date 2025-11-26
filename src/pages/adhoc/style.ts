@@ -73,9 +73,9 @@ export const ModeButton = styled.button<{ $active: boolean }>`
 
 export const ChainSelect = styled.select`
   padding: 14px 18px;
-  background: var(--neutral800, #060a1d);
+  background: #1e1e1e;
   color: var(--white, #fff);
-  border: 1px solid var(--secondary200, #343b4f);
+  border: 1px solid #444;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 600;
@@ -97,7 +97,7 @@ export const ChainSelect = styled.select`
 
 export const AnalyzeButton = styled.button`
   padding: 14px 32px;
-  background: var(--red300, #ff5a65);
+  background: var(--point, #ff5a65);
   color: var(--white, #fff);
   border: none;
   border-radius: 8px;

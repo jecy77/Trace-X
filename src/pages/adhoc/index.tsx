@@ -13,6 +13,9 @@ import {
 import { getFundFlow } from "@/api/getFundFlow";
 import type { AddressAnalysisResponse } from "@/types/api";
 
+import ArrowUpSmall from "@/assets/icon_arrow_up_2.svg";
+import ArrowDownSmall from "@/assets/icon_arrow_down2.svg";
+
 // 체인 정보
 const CHAINS = [
   { id: 1, name: "Ethereum" },
@@ -114,7 +117,7 @@ function getAddressLabel(
 export default function AdhocPage() {
   // 페이지 정보 (직접 정의)
   const title = "Ad-hoc 분석";
-  const intro = "주소 또는 트랜잭션을 분석하여 위험도를 평가합니다.";
+  const intro = "주소를 분석하여 위험도를 평가합니다.";
 
   const [address, setAddress] = useState("");
   const [chainId, setChainId] = useState(1);
@@ -654,7 +657,7 @@ export default function AdhocPage() {
     <S.Root>
       {/* 헤더 */}
       <S.HeaderSection>
-        <div>
+        <div style={{display: "flex", flexDirection: "column", gap: 5}}>
           <S.Title>{title}</S.Title>
           <S.Intro>{intro}</S.Intro>
         </div>
@@ -743,8 +746,12 @@ export default function AdhocPage() {
             }}
           >
             테스트 주소
-            <span style={{ fontSize: "10px" }}>
-              {showTestAddresses ? "▲" : "▼"}
+            <span >
+              <img
+                src={showTestAddresses ? ArrowUpSmall : ArrowDownSmall}
+                alt="toggle"
+                style={{ width: 10, height: 10 }}
+              />
             </span>
           </button>
 
@@ -1413,7 +1420,7 @@ export default function AdhocPage() {
       {/* 데이터가 없을 때 메시지 */}
       {!loading && !graphData && !error && (
         <S.EmptyMessage>
-          주소 또는 트랜잭션 해시를 입력하고 "분석하기" 버튼을 클릭하세요.
+          주소를 입력하고 "분석하기" 버튼을 클릭하세요.
         </S.EmptyMessage>
       )}
     </S.Root>
